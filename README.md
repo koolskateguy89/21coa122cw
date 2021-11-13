@@ -42,7 +42,7 @@ member-ID is 4 letters - first part of email address (e.g.: “coai” for coai@
 - [x] [booksearch.py](booksearch.py) - can probably add more to module docstring
 - [x] [bookcheckout.py](bookcheckout.py)
 - [x] [bookreturn.py](bookreturn.py)
-- [---] [bookrecommend.py](bookrecommend.py)
+- [x] [bookrecommend.py](bookrecommend.py) - no test code
 - [x] [database.py](database.py)
 - [x] [menu.py](menu.py) - no test code
 - [ ] [README](README) (optional)
@@ -53,7 +53,6 @@ Key:
 - \--: done functionality
 - \---: started gui
 - o: need to do module docstring
-- xx: need to write test code
 - x: DONE DONE
 
 ## Restrictions
@@ -74,105 +73,96 @@ Needs tests at the end of each module
 
 
 ## database
+10 genres, 3 books each, 3 copies each = 90 entries
 ```text
-1,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-2,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-3,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-4,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-5,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-6,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-7,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-8,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-9,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-10,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-11,Action,Avengers,Stan Lee,01/07/2003,0
-12,Action,Avengers,Stan Lee,01/07/2003,0
-13,Action,Avengers,Stan Lee,01/07/2003,0
-14,Action,Avengers,Stan Lee,01/07/2003,0
-15,Action,Avengers,Stan Lee,01/07/2003,0
-16,Action,Avengers,Stan Lee,01/07/2003,0
-17,Action,Avengers,Stan Lee,01/07/2003,0
-18,Action,Avengers,Stan Lee,01/07/2003,0
-19,Action,Avengers,Stan Lee,01/07/2003,0
-20,Action,Avengers,Stan Lee,01/07/2003,0
-21,Action,Avengers,Stan Lee,08/11/2003,0
-22,Action,Avengers,Stan Lee,08/11/2003,0
-23,Action,Avengers,Stan Lee,08/11/2003,0
-24,Action,Avengers,Stan Lee,08/11/2003,0
-25,Action,Avengers,Stan Lee,08/11/2003,0
-26,Action,Avengers,Stan Lee,08/11/2003,0
-27,Action,Avengers,Stan Lee,08/11/2003,0
-28,Action,Avengers,Stan Lee,08/11/2003,0
-29,Action,Avengers,Stan Lee,08/11/2003,0
-30,Action,Avengers,Stan Lee,08/11/2003,0
-31,Crime,Burn the Past,Eva Smith,03/10/2007,0
-32,Crime,Burn the Past,Eva Smith,03/10/2007,0
-33,Crime,Burn the Past,Eva Smith,03/10/2007,0
-34,Crime,Burn the Past,Eva Smith,03/10/2007,0
-35,Crime,Burn the Past,Eva Smith,03/10/2007,0
-36,Crime,Burn the Past,Eva Smith,03/10/2007,0
-37,Crime,Burn the Past,Eva Smith,03/10/2007,0
-38,Crime,Burn the Past,Eva Smith,03/10/2007,0
-39,Crime,Burn the Past,Eva Smith,03/10/2007,0
-40,Crime,Burn the Past,Eva Smith,03/10/2007,0
-41,Crime,An Inspector Calls,John Priestley,06/07/1945,0
-42,Crime,An Inspector Calls,John Priestley,06/07/1945,0
-43,Crime,An Inspector Calls,John Priestley,06/07/1945,0
-44,Crime,An Inspector Calls,John Priestley,06/07/1945,0
-45,Crime,An Inspector Calls,John Priestley,06/07/1945,0
-46,Crime,An Inspector Calls,John Priestley,06/07/1945,0
-47,Crime,An Inspector Calls,John Priestley,06/07/1945,0
-48,Crime,An Inspector Calls,John Priestley,06/07/1945,0
-49,Crime,An Inspector Calls,John Priestley,06/07/1945,0
-50,Crime,An Inspector Calls,John Priestley,06/07/1945,0
-51,Tragedy,Macbeth,William Shakespeare,25/10/2019,0
-52,Tragedy,Macbeth,William Shakespeare,25/10/2019,0
-53,Tragedy,Macbeth,William Shakespeare,25/10/2019,0
-54,Tragedy,Macbeth,William Shakespeare,25/10/2019,0
-55,Tragedy,Macbeth,William Shakespeare,25/10/2019,0
-56,Tragedy,Macbeth,William Shakespeare,25/10/2019,0
-57,Tragedy,Macbeth,William Shakespeare,25/10/2019,0
-58,Tragedy,Macbeth,William Shakespeare,25/10/2019,0
-59,Tragedy,Macbeth,William Shakespeare,25/10/2019,0
-60,Tragedy,Macbeth,William Shakespeare,25/10/2019,0
-61,Romance,Sinful Duty,Sally Young,07/09/2003,0
-62,Romance,Sinful Duty,Sally Young,07/09/2003,0
-63,Romance,Sinful Duty,Sally Young,07/09/2003,0
-64,Romance,Sinful Duty,Sally Young,07/09/2003,0
-65,Romance,Sinful Duty,Sally Young,07/09/2003,0
-66,Romance,Sinful Duty,Sally Young,07/09/2003,0
-67,Romance,Sinful Duty,Sally Young,07/09/2003,0
-68,Romance,Sinful Duty,Sally Young,07/09/2003,0
-69,Romance,Sinful Duty,Sally Young,07/09/2003,0
-70,Romance,Sinful Duty,Sally Young,07/09/2003,0
-71,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-72,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-73,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-74,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-75,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-76,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-77,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-78,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-79,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-80,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-81,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-82,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-83,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-84,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-85,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-86,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-87,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-88,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-89,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-90,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-91,Romance,Love...,Ben Daly,30/12/2012,0
-92,Romance,Love...,Ben Daly,30/12/2012,0
-93,Romance,Love...,Ben Daly,30/12/2012,0
-94,Romance,Love...,Ben Daly,30/12/2012,0
-95,Romance,Love...,Ben Daly,30/12/2012,0
-96,Romance,Love...,Ben Daly,30/12/2012,0
-97,Romance,Love...,Ben Daly,30/12/2012,0
-98,Romance,Love...,Ben Daly,30/12/2012,0
-99,Romance,Love...,Ben Daly,30/12/2012,0
-100,Romance,Love...,Ben Daly,30/12/2012,0
+1,Action,Avengers,Stan Lee,01/07/2003,0
+2,Action,Avengers,Stan Lee,01/07/2003,0
+3,Action,Avengers,Stan Lee,01/07/2003,0
+4,Action,Reflex Conquest,Jim Bob,08/07/2011,0
+5,Action,Reflex Conquest,Jim Bob,14/03/2012,0
+6,Action,Reflex Conquest,Jim Bob,14/03/2012,0
+7,Action,Soldier of Impact,Luke Rissacher,08/12/2015,0
+8,Action,Soldier of Impact,Luke Rissacher,08/12/2015,0
+9,Action,Soldier of Impact,Luke Rissacher,08/12/2015,0
+10,Crime,Burn the Past,Eva Smith,03/10/2007,0
+11,Crime,Burn the Past,Eva Smith,03/10/2007,0
+12,Crime,Burn the Past,Eva Smith,03/10/2007,0
+13,Crime,An Inspector Calls,John Priestley,06/07/1995,0
+14,Crime,An Inspector Calls,John Priestley,06/07/1995,0
+15,Crime,An Inspector Calls,John Priestley,06/07/1995,0
+16,Crime,Kill the Truth,Robin Messer,03/10/1995,0
+17,Crime,Kill the Truth,Robin Messer,03/10/1995,0
+18,Crime,Kill the Truth,Robin Messer,03/10/1995,0
+19,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
+20,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
+21,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
+22,Fantasy,Titan's Legacy,Malini Smolak,14/05/2015,0
+23,Fantasy,Titan's Legacy,Malini Smolak,14/05/2015,0
+24,Fantasy,Titan's Legacy,Malini Smolak,14/05/2015,0
+25,Fantasy,Call of Shadows,Odila Veith,30/07/2005,0
+26,Fantasy,Call of Shadows,Odila Veith,30/07/2005,0
+27,Fantasy,Call of Shadows,Odila Veith,30/07/2005,0
+28,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
+29,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
+30,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
+31,Mystery,Clue of the Forgotten Staircase,Albina Smith,09/10/2011,0
+32,Mystery,Clue of the Forgotten Staircase,Albina Smith,09/10/2011,0
+33,Mystery,Clue of the Forgotten Staircase,Albina Smith,09/10/2011,0
+34,Mystery,?,Albina Smith,10/10/2010,0
+35,Mystery,?,Albina Smith,10/10/2010,0
+36,Mystery,?,Albina Smith,10/10/2010,0
+37,Romance,Sinful Duty,Sally Young,07/09/2003,0
+38,Romance,Sinful Duty,Sally Young,07/09/2003,0
+39,Romance,Sinful Duty,Sally Young,07/09/2003,0
+40,Romance,Love...,Ben Daly,30/12/2012,0
+41,Romance,Love...,Ben Daly,30/12/2012,0
+42,Romance,Love...,Ben Daly,30/12/2012,0
+43,Romance,Toxic,Rhys Herbert,29/07/2000,0
+44,Romance,Toxic,Rhys Herbert,29/07/2000,0
+45,Romance,Toxic,Rhys Herbert,29/07/2000,0
+46,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
+47,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
+48,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
+49,Sci-Fi,Wonderland,Daniel Lena,17/08/1999,0
+50,Sci-Fi,Wonderland,Daniel Lena,17/08/1999,0
+51,Sci-Fi,Wonderland,Daniel Lena,17/08/1999,0
+52,Sci-Fi,Triple Science,Irving Adjei,06/10/1994,0
+53,Sci-Fi,Triple Science,Irving Adjei,06/10/1994,0
+54,Sci-Fi,Triple Science,Irving Adjei,06/10/1994,0
+55,Tragedy,Who's True?,Dennis Odunwo,01/09/1993,0
+56,Tragedy,Who's True?,Dennis Odunwo,01/09/1993,0
+57,Tragedy,Who's True?,Dennis Odunwo,01/09/1993,0
+58,Tragedy,Say My Name,Riley Davies,17/09/2002,0
+59,Tragedy,Say My Name,Riley Davies,17/09/2002,0
+60,Tragedy,Say My Name,Riley Davies,17/09/2002,0
+61,Tragedy,Macbeth,William Shakespeare,25/10/1990,0
+62,Tragedy,Macbeth,William Shakespeare,25/10/1990,0
+63,Tragedy,Macbeth,William Shakespeare,25/10/1990,0
+64,Drama,Are You Mad,Devonte Perkins,21/10/1995
+65,Drama,Are You Mad,Devonte Perkins,21/10/1995
+66,Drama,Are You Mad,Devonte Perkins,21/10/1995
+67,Drama,Wait Til' I Finish,Marvin Huncho,17/11/1993,0
+68,Drama,Wait Til' I Finish,Marvin Huncho,17/11/1993,0
+69,Drama,Wait Til' I Finish,Marvin Huncho,17/11/1993,0
+70,Drama,Money Talks,Marvin Bailey,06/03/1994,0
+71,Drama,Money Talks,Marvin Bailey,06/03/1994,0
+72,Drama,Money Talks,Marvin Bailey,06/03/1994,0
+73,Adventure,The Great Escape,Joshua Eduardo,08/03/1999,0
+74,Adventure,The Great Escape,Joshua Eduardo,08/03/1999,0
+75,Adventure,The Great Escape,Joshua Eduardo,08/03/1999,0
+76,Adventure,Bad Habits,Oakley Caesar-Su,04/06/1998,0
+77,Adventure,Bad Habits,Oakley Caesar-Su,04/06/1998,0
+78,Adventure,Bad Habits,Oakley Caesar-Su,04/06/1998,0
+79,Adventure,'Till I Collapse,Marshall Mathers III,17/10/1972,0
+80,Adventure,'Till I Collapse,Marshall Mathers III,17/10/1972,0
+81,Adventure,'Till I Collapse,Marshall Mathers III,17/10/1972,0
+82,Horror,Thriller,Michael Jackson,25/06/2009,0
+83,Horror,Thriller,Michael Jackson,25/06/2009,0
+84,Horror,Thriller,Michael Jackson,25/06/2009,0
+85,Horror,Untitled,Darren Diggs,10/11/1999,0
+86,Horror,Untitled,Darren Diggs,10/11/1999,0
+87,Horror,Untitled,Darren Diggs,10/11/1999,0
+88,Horror,Robbery,Abra Cadabara,04/11/2016,0
+89,Horror,Robbery,Abra Cadabara,04/11/2016,0
+90,Horror,Robbery,Abra Cadabara,04/11/2016,0
 ```

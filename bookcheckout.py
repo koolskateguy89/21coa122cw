@@ -41,10 +41,10 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
 
     bg = "black"
 
-    frame = LabelFrame(parent, text="Book Checkout", padx=5, pady=5, bg=bg, fg="#f8f8ff")
+    frame = LabelFrame(parent, text="Book Checkout", padx=5, pady=5, bg=bg,
+                       fg="#f8f8ff")
 
-    back_button = Button(frame, text="Back", fg="crimson", command=back_to_menu)
-    back_button.pack(pady=10)
+    Button(frame, text="Back", fg="crimson", command=back_to_menu).pack(pady=10)
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
@@ -120,7 +120,7 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str or None,
         if book is None:
             return error(f"No book with ID: {book_id}")
 
-        if (member := book['member']) != 0:
+        if (member := book['member']) != '0':
             return error("Book %s already on loan, to '%s'" %
                          (book_id, member))
 
@@ -132,8 +132,9 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str or None,
 
     logs = database.logs_for_member_id(member_id)
 
-    held_book_ids = [str(log['book_id']) for log in logs if utils.log_is_on_loan(log)
-                     and utils.is_more_than_60_days_ago(log['checkout'])]
+    held_book_ids = [str(log['book_id']) for log in logs
+                     if utils.log_is_on_loan(log) and
+                     utils.is_more_than_60_days_ago(log['checkout'])]
 
     warning_msg = None
 

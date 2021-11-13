@@ -41,8 +41,8 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     # put everything in the middle (horizontally)
     frame.grid_columnconfigure(0, weight=1)
 
-    Button(frame, text="Back", fg="crimson", command=lambda: _back(back_to_menu)) \
-        .grid(row=0, column=0)
+    Button(frame, text="Back", fg="crimson",
+           command=lambda: _back(back_to_menu)).grid(row=0, column=0)
 
     # embed a frame for a label and title_entry so they can be side-by-side
     # without affecting rest of layout

@@ -21,7 +21,7 @@ import booksearch
 
 root = Tk()
 root.title('Library Management System')
-root.geometry('600x450')
+root.geometry('800x600')
 root.attributes('-topmost', True)  # always on top
 
 container = Frame(root)

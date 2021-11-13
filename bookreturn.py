@@ -1,7 +1,7 @@
 """
 This modules provides functionality for the librarian to return books. It asks
 for the ID of the books they wish to return and either displays an appropriate
-error message or a mesage letting them know the books have been successfully
+error message or a message letting them know the books have been successfully
 returned.
 """
 from datetime import datetime
@@ -34,16 +34,16 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
 
     bg = "black"
 
-    frame = LabelFrame(parent, text="Book Return", padx=5, pady=5, bg=bg, fg="white")
+    frame = LabelFrame(parent, text="Book Return", padx=5, pady=5, bg=bg,
+                       fg="white")
 
-    back_button = Button(frame, text="Back", fg="crimson", command=back_to_menu)
-    back_button.pack(pady=10)
+    Button(frame, text="Back", fg="crimson", command=back_to_menu).pack(pady=10)
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
 
-    Label(input_frame, text="Enter book IDs (split by ','):", bg=bg, fg='white') \
-        .grid(row=0, column=0)
+    Label(input_frame, text="Enter book IDs (split by ','):", bg=bg,
+          fg='white').grid(row=0, column=0)
     ids_entry = Entry(input_frame, borderwidth=3)
     ids_entry.grid(row=0, column=1)
     # return book when Enter is pressed

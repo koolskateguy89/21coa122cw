@@ -1,11 +1,12 @@
 import random
-import sys
 from datetime import datetime, timedelta
 
 import database
 import utils
 
 import math
+
+NOW = datetime.now()
 
 
 # https://stackoverflow.com/a/553320/17381629
@@ -32,6 +33,9 @@ def dates_between(start_date, end_date, n: int):
 
 def random_date_after(after: datetime) -> datetime:
     first_year = after.year
+
+    if first_year == 2021:
+        return random_date_between(after, NOW)
 
     d = random.randint(1, 28)
     m = random.randint(1, 12)
@@ -71,7 +75,6 @@ def change_log_dates():
     database.update_logfile()
 
 
-NOW = datetime.now()
 
 
 def make_logs():
@@ -83,10 +86,10 @@ def make_logs():
 
     for book_id, book in database.books.items():
         # number of logs per book
-        n = random.randint(3, 7)
         # keep generating until not same as previous
-        while n == len(l):
-            n = random.randint(3, 7)
+        while (n := random.randint(3, 7)) == len(l):
+            pass
+
         l = [None] * n
         purchase = book['purchase_date']
 
@@ -94,8 +97,6 @@ def make_logs():
         dates = dates_between(purchase, NOW, n)
 
         #for date in dates: print(utils.date_to_str(date))
-
-        print(utils.date_to_str(dates[-2]), utils.date_to_str(dates[-1]), book['title'], book_id)
 
         for i in range(n-1):
             member = random.choice(members)
@@ -118,8 +119,8 @@ def make_logs():
         def add_final_log(is_on_loan: bool):
             member = random.choice(members)
 
-            checkout_date = dates[-2]
-            return_date = dates[-1]
+            checkout_date = dates[-1]
+            return_date = random_date_after(checkout_date)
 
             if is_on_loan:
                 book['member'] = member
@@ -133,8 +134,12 @@ def make_logs():
             logs.append(log)
         add_final_log(bool(random.getrandbits(1)))
 
-    logs.sort(key=lambda log: log['checkout'])
+    def key(log_):
+        return utils.date_to_str(log_['checkout']) + str(log_['book_id'])
 
+    logs.sort(key=key)
+
+    print()
     print('logs:', len(logs))
 
     database.logs = logs
@@ -145,3 +150,4 @@ def make_logs():
 
 if __name__ == "__main__":
     make_logs()
+    #change_log_dates()

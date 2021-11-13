@@ -1,101 +1,91 @@
 id,genre,title,author,purchase_date,member
-1,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,util
-2,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,book
-3,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,coaa
-4,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-5,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,arad
-6,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-7,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-8,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,suii
-9,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
-10,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,util
-11,Action,Avengers,Stan Lee,01/07/2003,0
-12,Action,Avengers,Stan Lee,01/07/2003,0
-13,Action,Avengers,Stan Lee,01/07/2003,coai
-14,Action,Avengers,Stan Lee,01/07/2003,0
-15,Action,Avengers,Stan Lee,01/07/2003,0
-16,Action,Avengers,Stan Lee,01/07/2003,0
-17,Action,Avengers,Stan Lee,01/07/2003,0
-18,Action,Avengers,Stan Lee,01/07/2003,coaa
-19,Action,Avengers,Stan Lee,01/07/2003,coaa
-20,Action,Avengers,Stan Lee,01/07/2003,coaa
-21,Action,Avengers,Stan Lee,08/11/2013,book
-22,Action,Avengers,Stan Lee,08/11/2013,0
-23,Action,Avengers,Stan Lee,08/11/2013,0
-24,Action,Avengers,Stan Lee,08/11/2013,suii
-25,Action,Avengers,Stan Lee,08/11/2013,coaa
-26,Action,Avengers,Stan Lee,08/11/2013,0
-27,Action,Avengers,Stan Lee,08/11/2013,0
-28,Action,Avengers,Stan Lee,08/11/2013,coaa
-29,Action,Avengers,Stan Lee,08/11/2013,coaa
-30,Action,Avengers,Stan Lee,08/11/2013,0
-31,Crime,Burn the Past,Eva Smith,03/10/2007,0
-32,Crime,Burn the Past,Eva Smith,03/10/2007,0
-33,Crime,Burn the Past,Eva Smith,03/10/2007,0
-34,Crime,Burn the Past,Eva Smith,03/10/2007,0
-35,Crime,Burn the Past,Eva Smith,03/10/2007,coaa
-36,Crime,Burn the Past,Eva Smith,03/10/2007,coaa
-37,Crime,Burn the Past,Eva Smith,03/10/2007,coai
-38,Crime,Burn the Past,Eva Smith,03/10/2007,0
-39,Crime,Burn the Past,Eva Smith,03/10/2007,0
-40,Crime,Burn the Past,Eva Smith,03/10/2007,arad
-41,Crime,An Inspector Calls,John Priestley,06/07/1995,0
-42,Crime,An Inspector Calls,John Priestley,06/07/1995,coaa
-43,Crime,An Inspector Calls,John Priestley,06/07/1995,0
-44,Crime,An Inspector Calls,John Priestley,06/07/1995,book
-45,Crime,An Inspector Calls,John Priestley,06/07/1995,0
-46,Crime,An Inspector Calls,John Priestley,06/07/1995,0
-47,Crime,An Inspector Calls,John Priestley,06/07/1995,book
-48,Crime,An Inspector Calls,John Priestley,06/07/1995,0
-49,Crime,An Inspector Calls,John Priestley,06/07/1995,0
-50,Crime,An Inspector Calls,John Priestley,06/07/1995,coaa
-51,Tragedy,Macbeth,William Shakespeare,25/10/1990,0
-52,Tragedy,Macbeth,William Shakespeare,25/10/1990,coaa
-53,Tragedy,Macbeth,William Shakespeare,25/10/1990,0
-54,Tragedy,Macbeth,William Shakespeare,25/10/1990,0
-55,Tragedy,Macbeth,William Shakespeare,25/10/1990,coaa
-56,Tragedy,Macbeth,William Shakespeare,25/10/1990,util
-57,Tragedy,Macbeth,William Shakespeare,25/10/1990,suii
-58,Tragedy,Macbeth,William Shakespeare,25/10/1990,util
-59,Tragedy,Macbeth,William Shakespeare,25/10/1990,0
-60,Tragedy,Macbeth,William Shakespeare,25/10/1990,arad
-61,Romance,Sinful Duty,Sally Young,07/09/2003,book
-62,Romance,Sinful Duty,Sally Young,07/09/2003,0
-63,Romance,Sinful Duty,Sally Young,07/09/2003,0
-64,Romance,Sinful Duty,Sally Young,07/09/2003,coai
-65,Romance,Sinful Duty,Sally Young,07/09/2003,book
-66,Romance,Sinful Duty,Sally Young,07/09/2003,0
-67,Romance,Sinful Duty,Sally Young,07/09/2003,0
-68,Romance,Sinful Duty,Sally Young,07/09/2003,book
-69,Romance,Sinful Duty,Sally Young,07/09/2003,book
-70,Romance,Sinful Duty,Sally Young,07/09/2003,util
-71,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,util
-72,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,coai
-73,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,coai
-74,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-75,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,suii
-76,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,coai
-77,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,book
-78,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,coaa
-79,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
-80,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,book
-81,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,coai
-82,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,util
-83,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,book
-84,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,coaa
-85,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,coai
-86,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,book
-87,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-88,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,util
-89,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-90,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,0
-91,Romance,Love...,Ben Daly,30/12/2012,book
-92,Romance,Love...,Ben Daly,30/12/2012,0
-93,Romance,Love...,Ben Daly,30/12/2012,0
-94,Romance,Love...,Ben Daly,30/12/2012,0
-95,Romance,Love...,Ben Daly,30/12/2012,0
-96,Romance,Love...,Ben Daly,30/12/2012,0
-97,Romance,Love...,Ben Daly,30/12/2012,0
-98,Romance,Love...,Ben Daly,30/12/2012,0
-99,Romance,Love...,Ben Daly,30/12/2012,0
-100,Romance,Love...,Ben Daly,30/12/2012,util
+1,Action,Avengers,Stan Lee,01/07/2003,coai
+2,Action,Avengers,Stan Lee,01/07/2003,0
+3,Action,Avengers,Stan Lee,01/07/2003,0
+4,Action,Reflex Conquest,Jim Bob,08/07/2011,suii
+5,Action,Reflex Conquest,Jim Bob,14/03/2012,coaa
+6,Action,Reflex Conquest,Jim Bob,14/03/2012,arad
+7,Action,Soldier of Impact,Luke Rissacher,08/12/2015,0
+8,Action,Soldier of Impact,Luke Rissacher,08/12/2015,0
+9,Action,Soldier of Impact,Luke Rissacher,08/12/2015,0
+10,Crime,Burn the Past,Eva Smith,03/10/2007,util
+11,Crime,Burn the Past,Eva Smith,03/10/2007,coai
+12,Crime,Burn the Past,Eva Smith,03/10/2007,0
+13,Crime,An Inspector Calls,John Priestley,06/07/1995,arad
+14,Crime,An Inspector Calls,John Priestley,06/07/1995,0
+15,Crime,An Inspector Calls,John Priestley,06/07/1995,0
+16,Crime,Kill the Truth,Robin Messer,03/10/1995,util
+17,Crime,Kill the Truth,Robin Messer,03/10/1995,coaa
+18,Crime,Kill the Truth,Robin Messer,03/10/1995,0
+19,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,coaa
+20,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,coaa
+21,Fantasy,Blade of Fire,Stuart Hill,04/09/2006,coaa
+22,Fantasy,Titan's Legacy,Malini Smolak,14/05/2015,0
+23,Fantasy,Titan's Legacy,Malini Smolak,14/05/2015,coai
+24,Fantasy,Titan's Legacy,Malini Smolak,14/05/2015,coaa
+25,Fantasy,Call of Shadows,Odila Veith,30/07/2005,0
+26,Fantasy,Call of Shadows,Odila Veith,30/07/2005,arad
+27,Fantasy,Call of Shadows,Odila Veith,30/07/2005,0
+28,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,util
+29,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,0
+30,Mystery,Secret of the Misshapen Headmaster,John Oakes,01/04/1995,arad
+31,Mystery,Clue of the Forgotten Staircase,Albina Smith,09/10/2011,0
+32,Mystery,Clue of the Forgotten Staircase,Albina Smith,09/10/2011,book
+33,Mystery,Clue of the Forgotten Staircase,Albina Smith,09/10/2011,coaa
+34,Mystery,?,Albina Smith,10/10/2010,0
+35,Mystery,?,Albina Smith,10/10/2010,0
+36,Mystery,?,Albina Smith,10/10/2010,0
+37,Romance,Sinful Duty,Sally Young,07/09/2003,util
+38,Romance,Sinful Duty,Sally Young,07/09/2003,0
+39,Romance,Sinful Duty,Sally Young,07/09/2003,coaa
+40,Romance,Love...,Ben Daly,30/12/2012,0
+41,Romance,Love...,Ben Daly,30/12/2012,0
+42,Romance,Love...,Ben Daly,30/12/2012,util
+43,Romance,Toxic,Rhys Herbert,29/07/2000,book
+44,Romance,Toxic,Rhys Herbert,29/07/2000,0
+45,Romance,Toxic,Rhys Herbert,29/07/2000,suii
+46,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
+47,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,0
+48,Sci-Fi,A Sci-Fi Adventure,John Smith,01/08/2010,suii
+49,Sci-Fi,Wonderland,Daniel Lena,17/08/1999,suii
+50,Sci-Fi,Wonderland,Daniel Lena,17/08/1999,0
+51,Sci-Fi,Wonderland,Daniel Lena,17/08/1999,0
+52,Sci-Fi,Triple Science,Irving Adjei,06/10/1994,coaa
+53,Sci-Fi,Triple Science,Irving Adjei,06/10/1994,0
+54,Sci-Fi,Triple Science,Irving Adjei,06/10/1994,0
+55,Tragedy,Who's True?,Dennis Odunwo,01/09/1993,0
+56,Tragedy,Who's True?,Dennis Odunwo,01/09/1993,0
+57,Tragedy,Who's True?,Dennis Odunwo,01/09/1993,0
+58,Tragedy,Say My Name,Riley Davies,17/09/2002,coai
+59,Tragedy,Say My Name,Riley Davies,17/09/2002,suii
+60,Tragedy,Say My Name,Riley Davies,17/09/2002,suii
+61,Tragedy,Macbeth,William Shakespeare,25/10/1990,0
+62,Tragedy,Macbeth,William Shakespeare,25/10/1990,0
+63,Tragedy,Macbeth,William Shakespeare,25/10/1990,0
+64,Drama,Are You Mad,Devonte Perkins,21/10/1995,0
+65,Drama,Are You Mad,Devonte Perkins,21/10/1995,0
+66,Drama,Are You Mad,Devonte Perkins,21/10/1995,arad
+67,Drama,Wait Til' I Finish,Marvin Huncho,17/11/1993,0
+68,Drama,Wait Til' I Finish,Marvin Huncho,17/11/1993,coai
+69,Drama,Wait Til' I Finish,Marvin Huncho,17/11/1993,0
+70,Drama,Money Talks,Marvin Bailey,06/03/1994,coaa
+71,Drama,Money Talks,Marvin Bailey,06/03/1994,0
+72,Drama,Money Talks,Marvin Bailey,06/03/1994,util
+73,Adventure,The Great Escape,Joshua Eduardo,08/03/1999,suii
+74,Adventure,The Great Escape,Joshua Eduardo,08/03/1999,0
+75,Adventure,The Great Escape,Joshua Eduardo,08/03/1999,suii
+76,Adventure,Bad Habits,Oakley Caesar-Su,04/06/1998,coai
+77,Adventure,Bad Habits,Oakley Caesar-Su,04/06/1998,arad
+78,Adventure,Bad Habits,Oakley Caesar-Su,04/06/1998,0
+79,Adventure,'Till I Collapse,Marshall Mathers III,17/10/1972,0
+80,Adventure,'Till I Collapse,Marshall Mathers III,17/10/1972,0
+81,Adventure,'Till I Collapse,Marshall Mathers III,17/10/1972,coai
+82,Horror,Thriller,Michael Jackson,25/06/2009,0
+83,Horror,Thriller,Michael Jackson,25/06/2009,coaa
+84,Horror,Thriller,Michael Jackson,25/06/2009,0
+85,Horror,Untitled,Darren Diggs,10/11/1999,0
+86,Horror,Untitled,Darren Diggs,10/11/1999,0
+87,Horror,Untitled,Darren Diggs,10/11/1999,arad
+88,Horror,Robbery,Abra Cadabara,04/11/2016,0
+89,Horror,Robbery,Abra Cadabara,04/11/2016,util
+90,Horror,Robbery,Abra Cadabara,04/11/2016,coaa

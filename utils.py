@@ -1,10 +1,8 @@
 """
-Miscellaneous utility functions to allow for greater code reuse.
+Miscellaneous utility functions that help with general functionalities.
 """
 
 from datetime import datetime, timedelta
-from tkinter import Label
-from tkinter.font import Font
 
 DATE_FORMAT = '%d/%m/%Y'
 SIXTY_DAYS = timedelta(days=60)

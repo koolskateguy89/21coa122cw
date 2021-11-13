@@ -1,39 +1,44 @@
 """"
-Your program must have functionality to recommend books to its member. The
-librarian should provide a member-ID to be able to find out a list of recommended
-books for the member. Number of books in the list must be between 3 and 10.
-Note the numbers are inclusive.
-The system database should have a transaction log, which keeps the loan history
-of library books. Based on this log, the system can find out the popular books for
-each genre and preferred genres for each member to give the suitable
-recommendation.
+This modules contains functions to be able to recommend books for a member,
+this is done by generating popularity scores for a book, which is determined by
+a combination of how much the user likes the genre and how many times the book
+has been taken out by members.
 
-A Python module which contains functions used to list the
-recommended books for a member in the popularity order and appropriately
-visualise the list by using the Matplotlib module. You should come up with the
-details of the popularity criteria.
+
+Score system:
+    score of title = genre popularity * title popularity
+
+    genre popularity = reversed(sorted_genres).index(genre) * 6
+        i.e. most popular genre = highest points & vice verse
+        (we multiply by 6 to give it greater weight in score system)
+
+    title popularity = the sum of book popularities for all books with that title
+        book popularity = number of times that book has been withdrawn
+
+
+Book recommendations are displayed in a bar chart which shows the title and the
+popularity of the title.
 """
+
 from tkinter import *
 from tkinter import messagebox
 from typing import Callable
 
+import matplotlib.patches as mpatches
+from matplotlib.axes import Axes
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, \
+    NavigationToolbar2Tk
+from matplotlib.figure import Figure
+
 import database
-
-# import matplotlib
-"""
-TODO: basically unique books?
-maybe have dict[str, set/list[int]]
-    key: title, value: all ids of that book 
-"""
-"""
-a bar chart? y-axis popularity, x-axis book name
-"""
-
-# it's pretty much functional, i just need to have more books of x genre
 
 frame: LabelFrame = None
 id_entry: Entry = None
+
 results_frame: Frame = None
+fig: Figure = None
+ax: Axes = None
+canvas: FigureCanvasTkAgg = None
 
 
 def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
@@ -55,11 +60,11 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
 
     bg = "black"
 
-    frame = LabelFrame(parent, text="Book Recommend", padx=5, pady=5, bg=bg,
+    frame = LabelFrame(parent, text="Book Recommend", padx=5, pady=2, bg=bg,
                        fg="#f8f8ff")
 
-    Button(frame, text="Back", fg="crimson", command=lambda: _back(back_to_menu)) \
-        .pack(pady=10)
+    Button(frame, text="Back", fg="crimson",
+           command=lambda: _back(back_to_menu)).pack(pady=10)
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
@@ -74,9 +79,11 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     # go back when Esc is pressed
     id_entry.bind('<Escape>', lambda event: _back(back_to_menu))
 
-    Button(frame, text="Recommend", command=_recommend).pack(pady=10)
+    Button(frame, text="Recommend", command=_recommend).pack(pady=2)
 
-    results_frame = LabelFrame(frame, text="Recommendations")
+    results_frame = LabelFrame(frame, text="Recommendations", bg=bg, fg='white',
+                               padx=5, pady=5, relief=RAISED)
+    _generate_results_view()
 
     return frame
 
@@ -89,6 +96,29 @@ def _back(back_to_menu: Callable):
     """
     hide_results()
     back_to_menu()
+
+
+def _generate_results_view():
+    """
+    Generate the widgets which will directly display the recommendations, ready
+    to be added to the main frame.
+    """
+    global fig
+    global ax
+    global canvas
+
+    fig = Figure(figsize=(5, 4), dpi=100)
+    ax = fig.add_subplot(111)
+
+    canvas = FigureCanvasTkAgg(fig, master=results_frame)
+    canvas.draw()
+
+    # pack_toolbar=False will make it easier to use a layout manager later on.
+    toolbar = NavigationToolbar2Tk(canvas, results_frame, pack_toolbar=False)
+    toolbar.update()
+
+    toolbar.pack(side=BOTTOM)
+    canvas.get_tk_widget().pack(side=TOP, fill=X)
 
 
 def _recommend():
@@ -104,12 +134,34 @@ def _recommend():
         messagebox.showerror('Error', f"Invalid member ID: '{member_id}'")
         return
 
-    titles: list[tuple[str, int]] = recommend_titles(member_id)
+    sorted_genres: list[str] = recommend_genres(member_id)
 
-    for t, p in titles:
-        print(t, p)
+    genre_popularities: dict[str, int] = {genre: (pop + 1) * 6 for pop, genre in enumerate(reversed(sorted_genres))}
 
-    # TODO: matplotlib bar chart
+    titles_with_scores: dict[str, int] = {}
+    # generate scores for each title
+    for genre in sorted_genres:
+        titles: list[tuple[str, int]] = recommend_titles_for_genre(genre)
+        genre_score = genre_popularities[genre]
+
+        for title, pop in titles:
+            titles_with_scores[title] = pop * genre_score
+
+    # sort titles by score (popularity)
+    sorted_titles: list[tuple[str, int]] = sorted(titles_with_scores.items(),
+                                                  key=lambda item: item[1],
+                                                  reverse=True)
+
+    if len(sorted_titles) < 3:
+        messagebox.showerror('Error',
+                             f"Cannot recommend books for '{member_id}'")
+        return
+    # can only show at most 10 titles
+    elif len(sorted_titles) > 10:
+        sorted_titles = sorted_titles[:10]
+
+    # see https://stackoverflow.com/a/69878556/17381629
+    _plot(*zip(*sorted_titles))
     display_results()
 
 
@@ -117,7 +169,7 @@ def display_results():
     """
     Display recommendations on screen.
     """
-    results_frame.pack(pady=10)
+    results_frame.pack(fill=BOTH, pady=10)
 
 
 def hide_results():
@@ -127,16 +179,79 @@ def hide_results():
     results_frame.pack_forget()
 
 
-def recommend_titles(member_id: str) -> list[tuple[str, int]]:
+def _reset_figure():
     """
-    Return the recommended titles along with their popularity.
+    Reset figure by clearing axes and re-setting axes settings.
+    """
+    ax.clear()
+    # axes.clear also removes settings so we have to re-set them
+    ax.set_title('Recommendations for member')
+    ax.set_xlabel('Book')
+    ax.set_ylabel('Popularity')
+    ax.tick_params(labelbottom=False)  # don't show x-axis values
 
-    :param member_id:
-    :return: list of (title, popularity) of books
+
+bar_colours = [
+    'red',
+    'darkorange',
+    'yellow',
+    'green',
+    'cyan',
+    'navy',
+    'indigo',
+    'pink',
+    'magenta',
+    'purple',
+]
+
+
+def _add_legend(titles: list[str]):
+    """
+    Add legend to axes as titles are too long to show on the x-axis.
+
+    :param titles: the recommended titles
+    """
+    patches = [mpatches.Patch(color=bar_colours[idx], label=title)
+               for idx, title in enumerate(titles)]
+    ax.legend(handles=patches)
+
+
+def _plot(titles: list[str], popularities: list[int]):
+    """
+    Plot given book recommendations onto a bar chart.
+
+    :param titles: the book titles to plot
+    :param popularities: the popularities to plot
+    """
+    _reset_figure()
+
+    _add_legend(titles)
+
+    x_axis = list(range(len(titles)))
+
+    # make bar chart
+    bars = ax.bar(x_axis, popularities, width=.5)
+
+    # set bar colour according to legend to show which title the bar represents
+    for idx, bar in enumerate(bars):
+        bar.set_color(bar_colours[idx])
+
+    canvas.draw()
+
+
+def recommend_genres(member_id: str) -> list[str]:
+    """
+    Calculate the given member's favourite genres and return them sorted by how
+    many times they have withdrawn a book of that genre, i.e. how much the
+    member likes the genre.
+
+    :param member_id: the ID of the member to recommend for
+    :return: the recommended genres for the member
     """
     member_logs: list[dict] = database.logs_for_member_id(member_id)
 
-    #           genre, number of books involved in transactions
+    # key = genre
+    # value = no. of books involved in transactions
     genres: dict[str, int] = {}
     for log in member_logs:
         book = database.search_book_by_id(log['book_id'])
@@ -147,17 +262,20 @@ def recommend_titles(member_id: str) -> list[tuple[str, int]]:
         else:
             genres[genre] += 1
 
-    favourite_genre = sorted(genres.items(), key=lambda item: item[1], reverse=True)[0][0]
+    sorted_genres = sorted(genres.items(), key=lambda item: item[1],
+                           reverse=True)
+    sorted_genres: list[str] = [genre for (genre, _) in sorted_genres]
 
-    return _most_popular_books_for_genre(favourite_genre)
+    return sorted_genres
 
 
-def _most_popular_books_for_genre(genre: str) -> list[tuple[str, int]]:
+def recommend_titles_for_genre(genre: str) -> list[tuple[str, int]]:
     """
-    Popularity is measured by how many times a book has been taken out
+    Calculate the most popular titles for a given genre. Popularity is given by
+    the number of times a book/title has been withdrawn.
 
     :param genre: the genre to check for
-    :return:
+    :return: a sorted list of (title, popularity) for the genre
     """
     books: dict[int, dict] = database.search_books_by_param('genre', genre)
 
@@ -172,8 +290,8 @@ def _most_popular_books_for_genre(genre: str) -> list[tuple[str, int]]:
         else:
             books_by_title[title].add(book_id)
 
-    # calculate the popularity of each title
     titles_with_popularity: list[tuple[str, int]] = []
+    # calculate the popularity of each title
     for title, ids in books_by_title.items():
         popularity = sum(_book_popularity_id(book_id) for book_id in ids)
         titles_with_popularity.append((title, popularity))
@@ -190,7 +308,8 @@ def _most_popular_books_for_genre(genre: str) -> list[tuple[str, int]]:
 
 def _book_popularity_id(book_id: int) -> int:
     """
-    Return the number of times the book with given ID has been taken out
+    Return the number of times the book with given ID has been taken out, i.e.
+    the book's popularity.
 
     :param book_id: the ID of the book to check
     :return: the popularity of the book
@@ -198,13 +317,3 @@ def _book_popularity_id(book_id: int) -> int:
     book_logs = database.logs_for_book_id(book_id)
     popularity = len(book_logs)
     return popularity
-
-
-# TODO: tests
-if __name__ == "__main__":
-    # _titles: list[tuple[str, int]] = recommend_books('util')
-    # print(books)
-
-    _titles: list[tuple[str, int]] = recommend_titles('book')
-    for _title, pop in _titles:
-        print(_title, pop)
