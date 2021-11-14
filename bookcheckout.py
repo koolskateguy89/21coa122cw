@@ -11,15 +11,18 @@ message is shown to the librarian about these books.
 """
 
 from tkinter import *
-from tkinter import messagebox
 from typing import Callable
 
 import database
-import utils
 
 frame: LabelFrame = None
 member_entry: Entry = None
 ids_entry: Entry = None
+
+warning_frame: LabelFrame = None
+warning_label: Label = None
+status_frame: LabelFrame = None
+status_label: Label = None
 
 
 def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
@@ -35,6 +38,11 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     global member_entry
     global ids_entry
 
+    global warning_frame
+    global warning_label
+    global status_frame
+    global status_label
+
     if frame is not None:
         member_entry.focus_set()
         return frame
@@ -44,7 +52,7 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     frame = LabelFrame(parent, text="Book Checkout", padx=5, pady=5, bg=bg,
                        fg="#f8f8ff")
 
-    Button(frame, text="Back", fg="crimson", command=back_to_menu).pack(pady=10)
+    Button(frame, text="Back", fg="crimson", command=_back).pack(pady=10)
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
@@ -67,32 +75,84 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
 
     Button(frame, text="Checkout", command=_checkout).pack(pady=10)
 
+    warning_frame = LabelFrame(frame, text="Warning", padx=1, bg='yellow')
+    warning_label = Label(warning_frame, bg=bg, fg='white', wraplength=450,
+                          justify=CENTER)
+    warning_label.pack()
+
+    status_frame = LabelFrame(frame, padx=1, fg='white')
+    status_label = Label(status_frame, bg=bg, fg='white')
+    status_label.pack()
+
     return frame
+
+
+def _back(back_to_menu: Callable):
+    """
+    Hide status and go back to main menu.
+
+    :param back_to_menu: the function that changes the frame to the menu frame
+    """
+    _hide_status()
+    back_to_menu()
 
 
 def _checkout():
     """
     Checkout given book(s) to given member and notify librarian of status.
     """
+    _hide_status()
+
     member_id = member_entry.get()
     ids = ids_entry.get().split(',')
 
     try:
         ids = [int(book_id) for book_id in ids]
     except ValueError:
-        messagebox.showerror('Error', 'A book ID is invalid (not a number)')
+        _show_status('Error', 'A book ID is invalid (not a number)', 'red')
         return
 
     error, warning, success = checkout_book(member_id, *ids)
 
     if error is not None:
-        messagebox.showerror('Error', error)
+        _show_status('Error', error, 'red')
 
     if warning is not None:
-        messagebox.showwarning('Warning', warning)
+        _show_warning(warning)
 
     if success is not None:
-        messagebox.showinfo('Success', success)
+        _show_status('Success', success, 'green')
+
+
+def _show_warning(msg):
+    """
+    Make the warning frame visible with the given warning message.
+
+    :param msg: the warning message
+    """
+    warning_label.configure(text=msg)
+    warning_frame.pack(pady=5)
+
+
+def _show_status(title, msg, colour):
+    """
+    Make the status frame visible and configure it to show the given message.
+
+    :param title: the status type
+    :param msg: the status message
+    :param colour: status frame background colour
+    """
+    status_frame.configure(text=title, bg=colour)
+    status_label.configure(text=msg)
+    status_frame.pack(pady=5)
+
+
+def _hide_status():
+    """
+    Hide the warning and status frames.
+    """
+    warning_frame.pack_forget()
+    status_frame.pack_forget()
 
 
 def checkout_book(member_id: str, *book_ids: int) -> tuple[str or None,
@@ -133,14 +193,14 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str or None,
     logs = database.logs_for_member_id(member_id)
 
     held_book_ids = [str(log['book_id']) for log in logs
-                     if utils.log_is_on_loan(log) and
-                     utils.is_more_than_60_days_ago(log['checkout'])]
+                     if database.log_is_on_loan(log) and
+                     database.is_more_than_60_days_ago(log['checkout'])]
 
     warning_msg = None
 
     if len(held_book_ids) != 0:
         warning_msg = f"Book(s) {{{','.join(held_book_ids)}}} are being held" \
-                      "for more than 60 days"
+                      " for more than 60 days"
 
     return None, warning_msg, _success(withdrawn)
 

@@ -2,7 +2,6 @@ import random
 from datetime import datetime, timedelta
 
 import database
-import utils
 
 import math
 
@@ -41,7 +40,7 @@ def random_date_after(after: datetime) -> datetime:
     m = random.randint(1, 12)
     y = random.randint(first_year, 2020)
 
-    return utils.str_to_date(f"{d}/{m}/{y}")
+    return database.str_to_date(f"{d}/{m}/{y}")
 
 
 def change_log_dates():
@@ -134,10 +133,7 @@ def make_logs():
             logs.append(log)
         add_final_log(bool(random.getrandbits(1)))
 
-    def key(log_):
-        return utils.date_to_str(log_['checkout']) + str(log_['book_id'])
-
-    logs.sort(key=key)
+    _sort_logs(logs)
 
     print()
     print('logs:', len(logs))
@@ -148,6 +144,22 @@ def make_logs():
     database.update_logfile()
 
 
+def _sort_logs(logs: list[dict]):
+    # sort by checkout date then book_id
+    def key(log):  # https://stackoverflow.com/a/69706123/17381629
+        return log['checkout'], log['book_id']
+
+    logs.sort(key=key)
+
+
+def update_db():
+    database.update_database()
+    database.update_logfile()
+
+
 if __name__ == "__main__":
-    make_logs()
+    #make_logs()
     #change_log_dates()
+    #_sort_logs(database.logs)
+    #update_db()
+    pass

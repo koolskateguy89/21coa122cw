@@ -1,6 +1,6 @@
 """
 This module contains functions that other modules can use to interact with the
-book database and logfile.
+book database and logfile. This module also contains utility functions.
 
 Books are represented by dicts:
     'id': int
@@ -26,8 +26,11 @@ The logfile is represented as a list[dict].
 """
 
 import csv
+from datetime import datetime, timedelta
 
-import utils
+DATE_FORMAT = '%d/%m/%Y'
+SIXTY_DAYS = timedelta(days=60)
+NOW = datetime.now()
 
 
 # Book database
@@ -47,7 +50,7 @@ def _read_database() -> dict[int, dict]:
 
         for book in reader:
             book['id'] = int(book['id'])
-            book['purchase_date'] = utils.str_to_date(book['purchase_date'])
+            book['purchase_date'] = str_to_date(book['purchase_date'])
 
             result[book['id']] = book
 
@@ -64,7 +67,7 @@ def update_database():
         for book in books.values():
             # write the purchase date in appropriate format to file
             book = {**book,
-                    'purchase_date': utils.date_to_str(book['purchase_date'])
+                    'purchase_date': date_to_str(book['purchase_date'])
                     }
             writer.writerow(book)
 
@@ -110,10 +113,10 @@ def _read_logfile() -> list[dict]:
         # update types
         for log in reader:
             log['book_id'] = int(log['book_id'])
-            log['checkout'] = utils.str_to_date(log['checkout'])
+            log['checkout'] = str_to_date(log['checkout'])
 
-            r = log['return']
-            log['return'] = utils.str_to_date(r) if len(r) != 0 else None
+            log['return'] = str_to_date(r) if len(r := log['return']) != 0 \
+                else None
 
             result.append(log)
 
@@ -130,9 +133,9 @@ def update_logfile():
 
         for log in logs:
             log = log.copy()
-            log['checkout'] = utils.date_to_str(log['checkout'])
-            if log['return'] is not None:
-                log['return'] = utils.date_to_str(log['return'])
+            log['checkout'] = date_to_str(log['checkout'])
+            if (ret := log['return']) is not None:
+                log['return'] = date_to_str(ret)
             writer.writerow(log)
 
 
@@ -173,11 +176,55 @@ def new_log(book_id: int, member_id: str) -> dict:
     }
 
 
+def log_is_on_loan(log: dict) -> bool:
+    """
+    Check if given log is incomplete, thus if the book it represents is on loan.
+
+    :param log: the log to check
+    :return: whether the log's book is on loan, according only to the log
+    """
+    return log.get('return') is None
+
+
+# utils
+
+def is_more_than_60_days_ago(date: datetime) -> bool:
+    """
+    Check if the given date was more than 60 days ago.
+
+    :param date: the date to check
+    :return: whether the given date was more than 60 days ago or not
+    """
+    return NOW - date > SIXTY_DAYS
+
+
+def str_to_date(s: str) -> datetime:
+    """
+    Convert a string to a datetime object according to a DD/MM/YYYY format.
+
+    :param s: the date string
+    :return: the datetime object
+    """
+    return datetime.strptime(s, DATE_FORMAT)
+
+
+def date_to_str(d: datetime) -> str:
+    """
+    Convert a datetime object to a string with DD/MM/YYYY format as it is more
+    appropriate than the default format 'YYYY-MM-DD HH:MM:SS'.
+
+    :param d: the datetime object
+    :return: the date string
+    """
+    return datetime.strftime(d, DATE_FORMAT)
+
+
 book_headers = ['id', 'genre', 'title', 'author', 'purchase_date', 'member']
 books: dict[int, dict] = _read_database()
 
 log_headers = ['book_id', 'checkout', 'return', 'member']
 logs: list[dict] = _read_logfile()
+
 
 # tests
 if __name__ == "__main__":
@@ -210,5 +257,25 @@ if __name__ == "__main__":
 
     # print('Book 11 title:', search_book_by_id(11)['title'])
     # print(logs)
+
+    # test date functions
+    _s = "12/01/2021"
+    _d = str_to_date(_s)
+    _s1 = date_to_str(_d)
+
+    assert _s == _s1, 'str_to_date and date_to_str are inconsistent'
+
+    assert is_more_than_60_days_ago(str_to_date('1/1/2000')), \
+        'is_more_than_60_days_ago does not function correctly'
+    assert not is_more_than_60_days_ago(datetime.now()), \
+        'is_more_than_60_days_ago does not function correctly'
+
+    # test dict-related functions
+    _log_on_loan = {'return': None}
+    _log_not_on_loan = {'return': datetime.now()}
+
+    assert log_is_on_loan(_log_on_loan), 'log_is_on_loan failed for on loan'
+    assert not log_is_on_loan(_log_not_on_loan), \
+        'log_is_on_loan failed for not on loan'
 
     print('database.py has passed all tests!')

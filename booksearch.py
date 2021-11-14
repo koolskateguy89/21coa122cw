@@ -8,7 +8,7 @@ from tkinter.ttk import Treeview, Style
 from typing import Callable
 
 import database
-import utils
+from database import date_to_str
 
 frame: LabelFrame = None
 title_entry: Entry = None
@@ -135,7 +135,7 @@ def _search():
         # mutate some values to give librarian a better experience
         book = {**book,
                 # display appropriate string representation of date
-                'purchase_date': utils.date_to_str(book['purchase_date']),
+                'purchase_date': date_to_str(book['purchase_date']),
                 # if book is available, don't show anyone as member
                 'member': member if (member := book['member']) != '0' else ''
                 }
@@ -189,8 +189,8 @@ def _should_highlight(book: dict) -> bool:
     logs: list[dict] = database.logs_for_book_id(book['id'])
 
     for log in logs:
-        if (utils.log_is_on_loan(log) and
-                utils.is_more_than_60_days_ago(log['checkout'])):
+        if (database.log_is_on_loan(log) and
+                database.is_more_than_60_days_ago(log['checkout'])):
             return True
 
     return False

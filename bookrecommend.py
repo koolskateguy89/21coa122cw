@@ -21,7 +21,6 @@ popularity of the title.
 """
 
 from tkinter import *
-from tkinter import messagebox
 from typing import Callable
 
 import matplotlib.patches as mpatches
@@ -40,6 +39,9 @@ fig: Figure = None
 ax: Axes = None
 canvas: FigureCanvasTkAgg = None
 
+error_frame: Frame = None
+error_label: Label = None
+
 
 def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     """
@@ -53,6 +55,8 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     global frame
     global id_entry
     global results_frame
+    global error_frame
+    global error_label
 
     if frame is not None:
         id_entry.focus_set()
@@ -84,6 +88,11 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     results_frame = LabelFrame(frame, text="Recommendations", bg=bg, fg='white',
                                padx=5, pady=5, relief=RAISED)
     _generate_results_view()
+
+    error_frame = LabelFrame(frame, text="Error", bg='red', fg='white',
+                             relief=RAISED)
+    error_label = Label(error_frame, bg=bg, fg='white')
+    error_label.pack()
 
     return frame
 
@@ -124,14 +133,14 @@ def _generate_results_view():
 def _recommend():
     """
     Work out what titles to recommend to the member with given ID, and display
-    the results.
+    the result or any errors.
     """
     hide_results()
 
     member_id = id_entry.get()
 
     if len(member_id) != 4:
-        messagebox.showerror('Error', f"Invalid member ID: '{member_id}'")
+        _show_error(f"Invalid member ID: '{member_id}'")
         return
 
     sorted_genres: list[str] = recommend_genres(member_id)
@@ -153,8 +162,7 @@ def _recommend():
                                                   reverse=True)
 
     if len(sorted_titles) < 3:
-        messagebox.showerror('Error',
-                             f"Cannot recommend books for '{member_id}'")
+        _show_error(f"Cannot recommend books for '{member_id}'")
         return
     # can only show at most 10 titles
     elif len(sorted_titles) > 10:
@@ -174,9 +182,20 @@ def display_results():
 
 def hide_results():
     """
-    Hide recommendations.
+    Hide recommendations and error message.
     """
     results_frame.pack_forget()
+    error_frame.pack_forget()
+
+
+def _show_error(msg):
+    """
+    Show the error frame with the given error message
+
+    :param msg: the error message
+    """
+    error_label.configure(text=msg)
+    error_frame.pack(pady=5)
 
 
 def _reset_figure():

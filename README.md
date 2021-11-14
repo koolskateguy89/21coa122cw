@@ -46,14 +46,6 @@ member-ID is 4 letters - first part of email address (e.g.: “coai” for coai@
 - [x] [database.py](database.py)
 - [x] [menu.py](menu.py) - no test code
 - [ ] [README](README) (optional)
-- [x] [utils.py](utils.py)
-
-Key:
-- \-:  started
-- \--: done functionality
-- \---: started gui
-- o: need to do module docstring
-- x: DONE DONE
 
 ## Restrictions
 

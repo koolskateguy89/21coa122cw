@@ -4,16 +4,17 @@ for the ID of the books they wish to return and either displays an appropriate
 error message or a message letting them know the books have been successfully
 returned.
 """
+
 from datetime import datetime
 from tkinter import *
-from tkinter import messagebox
 from typing import Callable
 
 import database
-import utils
 
 frame: LabelFrame = None
 ids_entry: Entry = None
+status_frame: LabelFrame = None
+status_label: Label = None
 
 
 def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
@@ -27,6 +28,8 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     """
     global frame
     global ids_entry
+    global status_frame
+    global status_label
 
     if frame is not None:
         ids_entry.focus_set()
@@ -54,7 +57,21 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     return_button = Button(frame, text="Return", command=_return)
     return_button.pack(pady=10)
 
+    status_frame = LabelFrame(frame, padx=1, pady=5, fg='white')
+    status_label = Label(status_frame, bg=bg, fg='white')
+    status_label.pack()
+
     return frame
+
+
+def _back(back_to_menu: Callable):
+    """
+    Hide status and go back to main menu.
+
+    :param back_to_menu: the function that changes the frame to the menu frame
+    """
+    _hide_status()
+    back_to_menu()
 
 
 def _return():
@@ -66,16 +83,36 @@ def _return():
     try:
         ids = [int(book_id) for book_id in ids]
     except ValueError:
-        messagebox.showerror('Error', 'A book ID is invalid (not a number)')
+        _show_status('Error', 'A book ID is invalid (not a number)', 'red')
         return
 
     error, success = return_book(*ids)
 
     if error is not None:
-        messagebox.showerror('Error', error)
+        _show_status('Error', error, 'red')
 
     if success is not None:
-        messagebox.showinfo('Success', success)
+        _show_status('Success', success, 'green')
+
+
+def _show_status(title, msg, colour):
+    """
+    Make the status frame visible and configure it to show the given message.
+
+    :param title: the status type
+    :param msg: the status message
+    :param colour: status frame background colour
+    """
+    status_frame.configure(text=title, bg=colour)
+    status_label.configure(text=msg)
+    status_frame.pack(pady=5)
+
+
+def _hide_status():
+    """
+    Hide the status frame.
+    """
+    status_frame.pack_forget()
 
 
 def return_book(*book_ids: int) -> tuple[str or None, str or None]:
@@ -103,7 +140,7 @@ def return_book(*book_ids: int) -> tuple[str or None, str or None]:
         # get the log that was the checkout of this book
         log = None
         for _log in book_logs:
-            if utils.log_is_on_loan(_log):
+            if database.log_is_on_loan(_log):
                 log = _log
                 break
 

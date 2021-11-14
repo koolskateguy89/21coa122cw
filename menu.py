@@ -40,7 +40,7 @@ def back_to_menu():
     show_frame(menu)
 
 
-def menu_button(text: str, module) -> Button:
+def _menu_button(text: str, module) -> Button:
     """
     Return a standardised Button that acts as a menu option.
 
@@ -48,8 +48,8 @@ def menu_button(text: str, module) -> Button:
     :param module: the module the button will opens
     :return: a decorated button
     """
-    return Button(menu, text=text, command=lambda: show_module(module), bg=bg,
-                  fg=fg, width=48, height=2, borderwidth=2)
+    return Button(menu, text=text, command=lambda: display_module(module),
+                  bg=bg, fg=fg, width=48, height=2, borderwidth=2)
 
 
 def setup_frame(frame):
@@ -70,7 +70,7 @@ def show_frame(frame):
     frame.tkraise()
 
 
-def show_module(module):
+def display_module(module):
     """
     Show the frame for the given module, providing access to a program
     functionality
@@ -102,10 +102,10 @@ title_label = Label(menu, text="Library Management System", bg=bg, fg=fg)
 title_label.pack(pady=20)
 configure_font(title_label, underline=True)
 
-search_button = menu_button("Search", booksearch)
-checkout_button = menu_button("Checkout", bookcheckout)
-return_button = menu_button("Return", bookreturn)
-recommend_button = menu_button("Recommend", bookrecommend)
+search_button = _menu_button("Search", booksearch)
+checkout_button = _menu_button("Checkout", bookcheckout)
+return_button = _menu_button("Return", bookreturn)
+recommend_button = _menu_button("Recommend", bookrecommend)
 
 search_button.pack(pady=5)
 checkout_button.pack(pady=5)
