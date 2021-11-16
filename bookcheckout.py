@@ -52,7 +52,8 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     frame = LabelFrame(parent, text="Book Checkout", padx=5, pady=5, bg=bg,
                        fg="#f8f8ff")
 
-    Button(frame, text="Back", fg="crimson", command=_back).pack(pady=10)
+    Button(frame, text="Back", fg="crimson",
+           command=lambda: _back(back_to_menu)).pack(pady=10)
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
