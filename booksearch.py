@@ -1,6 +1,8 @@
 """
 This module provides the functionality for searching for books, this is done by
 using the database module to query the book database.
+
+TODO: add ignore case
 """
 
 from tkinter import *
@@ -11,7 +13,10 @@ import database
 from database import date_to_str
 
 frame: LabelFrame = None
+
 title_entry: Entry = None
+ignore_case = False
+
 results_wrapper: Frame = None
 tree: Treeview = None
 style: Style = None
@@ -38,11 +43,9 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
 
     frame = LabelFrame(parent, text="Book Search", padx=5, pady=5, bg=bg,
                        fg="white")
-    # put everything in the middle (horizontally)
-    frame.grid_columnconfigure(0, weight=1)
 
     Button(frame, text="Back", fg="crimson",
-           command=lambda: _back(back_to_menu)).grid(row=0, column=0)
+           command=lambda: _back(back_to_menu)).pack()
 
     # embed a frame for a label and title_entry so they can be side-by-side
     # without affecting rest of layout
@@ -58,9 +61,12 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     title_entry.bind('<Escape>', lambda event: _back(back_to_menu))
 
     title_entry.grid(row=0, column=1)
-    title_frame.grid(row=2, column=0, pady=10)
+    title_frame.pack(pady=10)
 
-    Button(frame, text="Search", command=_search).grid(row=3, column=0)
+    Checkbutton(frame, text="Ignore case", bg=bg, fg="white",
+                command=_invert_ignore_case).pack()
+
+    Button(frame, text="Search", command=_search).pack()
 
     _generate_results_view()
 
@@ -120,11 +126,21 @@ def _fix_treemap_color():
               background=fixed_map('background'))
 
 
+def _invert_ignore_case():
+    """
+    Invert the boolean ignore_case variable.
+    """
+    global ignore_case
+    ignore_case = not ignore_case
+
+
 def _search():
     """
     Perform a search then display the results on screen.
     """
     _clear_results()
+
+    print(ignore_case)
 
     title = title_entry.get()
     results: list[dict] = _search_by_title(title)
@@ -149,14 +165,14 @@ def display_results():
     """
     Display search results on screen.
     """
-    results_wrapper.grid(row=4, column=0, pady=10)
+    results_wrapper.pack(pady=10)
 
 
 def hide_results():
     """
     Hide search results.
     """
-    results_wrapper.grid_forget()
+    results_wrapper.pack_forget()
 
 
 def _clear_results():
@@ -166,14 +182,20 @@ def _clear_results():
     tree.delete(*tree.get_children())
 
 
-def _search_by_title(title) -> list[dict]:
+def _search_by_title(title, _ignore_case=False) -> list[dict]:
     """
     Return all books with the given title.
 
     :param title: the search param
+    :param _ignore_case: whether to ignore title case
     :return: list of books with the given title
     """
-    result: dict[int, dict] = database.search_books_by_param('title', title)
+    if ignore_case:
+        title = title.casefold()
+        result = {book_id: book for (book_id, book) in database.books.items()
+                  if book['title'].casefold() == title}
+    else:
+        result: dict[int, dict] = database.search_books_by_param('title', title)
 
     return list(result.values())
 
