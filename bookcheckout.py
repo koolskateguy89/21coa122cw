@@ -11,11 +11,9 @@ message is shown to the librarian about these books.
 """
 
 from tkinter import *
-from typing import Callable
 
 import database
 
-frame: LabelFrame = None
 member_entry: Entry = None
 ids_entry: Entry = None
 
@@ -25,16 +23,13 @@ status_frame: LabelFrame = None
 status_label: Label = None
 
 
-def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
+def get_frame(parent) -> LabelFrame:
     """
-    Lazily create the frame for checking out books and set focus on
-    the member ID entry.
+    Create and decorate the frame for checking out books.
 
     :param parent: the parent of the frame
-    :param back_to_menu: function that returns back to menu
     :return: the fully decorated frame
     """
-    global frame
     global member_entry
     global ids_entry
 
@@ -43,17 +38,10 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     global status_frame
     global status_label
 
-    if frame is not None:
-        member_entry.focus_set()
-        return frame
-
-    bg = "black"
+    bg = 'black'
 
     frame = LabelFrame(parent, text="Book Checkout", padx=5, pady=5, bg=bg,
-                       fg="#f8f8ff")
-
-    Button(frame, text="Back", fg="crimson",
-           command=lambda: _back(back_to_menu)).pack(pady=10)
+                       fg='#f8f8ff')
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
@@ -63,7 +51,6 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     member_entry = Entry(input_frame, borderwidth=3)
     member_entry.focus_set()
     member_entry.grid(row=0, column=1)
-    member_entry.bind("<Escape>", lambda event: back_to_menu())
 
     Label(input_frame, text="Enter book IDs (split by ','):", bg=bg, fg='white',
           width=21, anchor=W).grid(row=1, column=0)
@@ -71,8 +58,6 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     ids_entry.grid(row=1, column=1)
     # checkout book when Enter is pressed
     ids_entry.bind('<Return>', lambda event: _checkout())
-    # go back when Esc is pressed
-    ids_entry.bind('<Escape>', lambda event: back_to_menu())
 
     Button(frame, text="Checkout", command=_checkout).pack(pady=10)
 
@@ -88,14 +73,12 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     return frame
 
 
-def _back(back_to_menu: Callable):
+def on_show():
     """
-    Hide status and go back to main menu.
-
-    :param back_to_menu: the function that changes the frame to the menu frame
+    Hide status and set focus on the member ID entry when this frame is shown.
     """
     _hide_status()
-    back_to_menu()
+    member_entry.focus_set()
 
 
 def _checkout():

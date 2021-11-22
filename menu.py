@@ -10,9 +10,7 @@ a specific frame to the top of the stacking order, displaying it and effectively
 hiding the others.
 See: https://stackoverflow.com/a/7557028
 """
-import modulefinder
 from tkinter import *
-from tkinter.font import Font
 from tkinter import ttk
 
 import bookcheckout
@@ -20,134 +18,45 @@ import bookrecommend
 import bookreturn
 import booksearch
 
-root = Tk()
-root.title('Library Management System')
-root.geometry('800x600')
-root.attributes('-topmost', True)  # always on top
-
-"""
-container = Frame(root)
-container.pack(side="top", fill="both", expand=True)
-container.grid_rowconfigure(0, weight=1)
-container.grid_columnconfigure(0, weight=1)
-"""
-
-bg = 'black'
-fg = 'white'
+modules = {
+    'Search': booksearch,
+    'Checkout': bookcheckout,
+    'Return': bookreturn,
+    'Recommend': bookrecommend
+}
 
 
-def back_to_menu():
+def on_tab_selected(event):
+    selected_tab = event.widget.select()
+    tab_text = event.widget.tab(selected_tab, "text")
+    module = modules[tab_text]
+    module.on_show()
+
+
+def main():
     """
-    Change the frame to the menu fame.
+    Setup and display the program's GUI.
     """
-    show_frame(menu)
+    root = Tk()
+    root.title('Library Management System')
+    root.geometry('800x600')
+    root.attributes('-topmost', True)  # always on top
 
+    style = ttk.Style()
+    style.theme_use('clam')
+    style.configure('TNotebook', background='black')
 
-def _menu_button(text: str, module) -> Button:
-    """
-    Return a standardised Button that acts as a menu option.
+    notebook = ttk.Notebook(root)
+    notebook.bind('<<NotebookTabChanged>>', on_tab_selected)
+    notebook.pack(fill=BOTH, expand=True)
 
-    :param text: the button text
-    :param module: the module the button will opens
-    :return: a decorated button
-    """
-    return Button(menu, text=text, command=lambda: display_module(module),
-                  bg=bg, fg=fg, width=48, height=2, borderwidth=2)
+    for text, module in modules.items():
+        frame = module.get_frame(notebook)
+        frame.pack(fill=BOTH, expand=True)
+        notebook.add(frame, text=text)
 
+    root.mainloop()
 
-def setup_frame(frame):
-    """
-    Add frame to the stacking order, ready to be shown.
-
-    :param frame: the frame to add
-    """
-    frame.grid(row=0, column=0, sticky="nsew")
-
-
-def show_frame(frame):
-    """
-    Show the given frame by raising it to the top of the stacking order.
-
-    :param frame: the frame to show
-    """
-    frame.tkraise()
-
-
-def display_module(module):
-    """
-    Show the frame for the given module, providing access to a program
-    functionality
-
-    :param module: the module to show
-    """
-    frame = module.get_frame(container, back_to_menu)
-    setup_frame(frame)
-    show_frame(frame)
-
-
-def configure_font(label: Label, **options):
-    """
-    Configure the font of a given label, according to given options.
-
-    :param label: the label that the font will be configured to
-    :param options: font options (family, size, weight, slant, underline,
-                    or overstrike)
-    """
-    font = Font(label, label.cget("font"))
-    font.configure(**options)
-    label.configure(font=font)
-
-
-def noop(): pass
-
-
-style = ttk.Style()
-style.configure('TNotebook', background='black')
-style.theme_use('clam')
-
-notebook = ttk.Notebook(root)
-notebook.pack(side=TOP, fill=BOTH, expand=True)
-
-modules = [
-    booksearch,
-    bookcheckout,
-    bookreturn,
-    bookrecommend
-]
-
-for module in modules:
-    frame = module.get_frame(notebook, noop)
-    frame.pack(side=TOP, fill=BOTH, expand=True)
-    notebook.add(frame, text=module.__name__[4:].capitalize())
-
-"""
-notebook.add(booksearch.get_frame(notebook, noop), text="Search")
-notebook.add(bookcheckout.get_frame(notebook, noop), text="Checkout")
-notebook.add(bookreturn.get_frame(notebook, noop), text="Return")
-notebook.add(bookrecommend.get_frame(notebook, noop), text="Recommend")
-"""
-
-"""
-menu = LabelFrame(container, text="Main Menu", bg=bg, fg=fg)
-menu.configure(padx=5, pady=10)
-
-title_label = Label(menu, text="Library Management System", bg=bg, fg=fg)
-title_label.pack(pady=20)
-configure_font(title_label, underline=True)
-
-search_button = _menu_button("Search", booksearch)
-checkout_button = _menu_button("Checkout", bookcheckout)
-return_button = _menu_button("Return", bookreturn)
-recommend_button = _menu_button("Recommend", bookrecommend)
-
-search_button.pack(pady=5)
-checkout_button.pack(pady=5)
-return_button.pack(pady=5)
-recommend_button.pack(pady=5)
-
-setup_frame(menu)
-show_frame(menu)
-"""
 
 if __name__ == "__main__":
-    root.mainloop()
+    main()

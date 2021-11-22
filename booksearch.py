@@ -8,7 +8,6 @@ title contains the given search query.
 
 from tkinter import *
 from tkinter.ttk import Treeview
-from typing import Callable
 
 import database
 from database import date_to_str
@@ -23,13 +22,11 @@ results_wrapper: Frame = None
 tree: Treeview = None
 
 
-def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
+def get_frame(parent) -> LabelFrame:
     """
-    Lazily create the frame for searching for books and set focus on
-    the title entry.
+    Create and decorate the frame for searching for books.
 
     :param parent: the parent of the frame
-    :param back_to_menu: function that returns back to menu
     :return: the fully decorated frame
     """
     global frame
@@ -38,17 +35,10 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     global contains
     global results_wrapper
 
-    if frame is not None:
-        title_entry.focus_set()
-        return frame
-
-    bg = "black"
+    bg = 'black'
 
     frame = LabelFrame(parent, text="Book Search", padx=5, pady=5, bg=bg,
                        fg='white')
-
-    Button(frame, text="Back", fg='crimson',
-           command=lambda: _back(back_to_menu)).pack()
 
     # embed a frame for a label and title_entry so they can be side-by-side
     # without affecting rest of layout
@@ -60,8 +50,6 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     title_entry.focus_set()
     # search when enter is pressed
     title_entry.bind('<Return>', lambda event: _search())
-    # go back when Esc is pressed
-    title_entry.bind('<Escape>', lambda event: _back(back_to_menu))
 
     title_entry.grid(row=0, column=1)
     title_frame.pack(pady=7)
@@ -84,14 +72,12 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     return frame
 
 
-def _back(back_to_menu: Callable):
+def on_show():
     """
-    Hide results and go back to main menu.
-
-    :param back_to_menu: the function that changes the frame to the menu frame
+    Hide results and set focus on the title entry when this frame is shown.
     """
     hide_results()
-    back_to_menu()
+    title_entry.focus_set()
 
 
 def _generate_results_view():

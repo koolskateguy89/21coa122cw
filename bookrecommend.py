@@ -21,7 +21,6 @@ popularity of the title.
 """
 
 from tkinter import *
-from typing import Callable
 
 from matplotlib import pyplot as plt, patches as mpatches
 from matplotlib.axes import Axes
@@ -34,7 +33,6 @@ import database
 plt.style.use('Solarize_Light2')
 plt.style.use('dark_background')
 
-frame: LabelFrame = None
 id_entry: Entry = None
 
 results_frame: Frame = None
@@ -46,32 +44,22 @@ error_frame: Frame = None
 error_label: Label = None
 
 
-def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
+def get_frame(parent) -> LabelFrame:
     """
-    Lazily create the frame for recommending books and set focus on the
-    member ID entry.
+    Create and decorate the frame for recommending books.
 
     :param parent: the parent of the frame
-    :param back_to_menu: function that returns back to menu
     :return: the fully decorated frame
     """
-    global frame
     global id_entry
     global results_frame
     global error_frame
     global error_label
 
-    if frame is not None:
-        id_entry.focus_set()
-        return frame
-
-    bg = "black"
+    bg = 'black'
 
     frame = LabelFrame(parent, text="Book Recommend", padx=5, pady=2, bg=bg,
-                       fg="#f8f8ff")
-
-    Button(frame, text="Back", fg="crimson",
-           command=lambda: _back(back_to_menu)).pack(pady=10)
+                       fg='#f8f8ff')
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
@@ -83,8 +71,6 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     id_entry.grid(row=0, column=1)
     # recommend book when Enter is pressed
     id_entry.bind('<Return>', lambda event: _recommend())
-    # go back when Esc is pressed
-    id_entry.bind('<Escape>', lambda event: _back(back_to_menu))
 
     Button(frame, text="Recommend", command=_recommend).pack(pady=2)
 
@@ -100,14 +86,12 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     return frame
 
 
-def _back(back_to_menu: Callable):
+def on_show():
     """
-    Hide results and go back to main menu.
-
-    :param back_to_menu: the function that changes the frame to the menu frame
+    Hide results and set focus on the book ID entry when this frame is shown.
     """
     hide_results()
-    back_to_menu()
+    id_entry.focus_set()
 
 
 def _generate_results_view():

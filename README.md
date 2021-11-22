@@ -56,7 +56,7 @@ member-ID is 4 letters - first part of email address (e.g.: “coai” for coai@
 
 ## How I'm doing things
 
-- As I can't use classes, store books as `dicts` (see [database.py](database.py))
+- As I can't use classes, store books as `dicts` (see [database.py](database.py)) - use SimpleNamespace???
 - Also store logs as `dicts`
 - Recommending books
   - Uses a score system (based on how much the user likes the genre and how popular the book is)

@@ -10,40 +10,29 @@ updated with a return date to signify that the book has been returned.
 
 from datetime import datetime
 from tkinter import *
-from typing import Callable
 
 import database
 
-frame: LabelFrame = None
 ids_entry: Entry = None
 status_frame: LabelFrame = None
 status_label: Label = None
 
 
-def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
+def get_frame(parent) -> LabelFrame:
     """
-    Lazily create the frame for checking out books and set focus on
-    the member ID entry.
+    Create and decorate the frame for checking out books.
 
     :param parent: the parent of the frame
-    :param back_to_menu: function that returns back to menu
     :return: the fully decorated frame
     """
-    global frame
     global ids_entry
     global status_frame
     global status_label
 
-    if frame is not None:
-        ids_entry.focus_set()
-        return frame
-
-    bg = "black"
+    bg = 'black'
 
     frame = LabelFrame(parent, text="Book Return", padx=5, pady=5, bg=bg,
-                       fg="white")
-
-    Button(frame, text="Back", fg="crimson", command=back_to_menu).pack(pady=10)
+                       fg='white')
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
@@ -54,8 +43,6 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     ids_entry.grid(row=0, column=1)
     # return book when Enter is pressed
     ids_entry.bind('<Return>', lambda event: _return())
-    # go back when Esc is pressed
-    ids_entry.bind('<Escape>', lambda event: back_to_menu())
 
     return_button = Button(frame, text="Return", command=_return)
     return_button.pack(pady=10)
@@ -67,14 +54,12 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     return frame
 
 
-def _back(back_to_menu: Callable):
+def on_show():
     """
-    Hide status and go back to main menu.
-
-    :param back_to_menu: the function that changes the frame to the menu frame
+    Hide status and set focus on the book IDs entry when this frame is shown.
     """
     _hide_status()
-    back_to_menu()
+    ids_entry.focus_set()
 
 
 def _return():
