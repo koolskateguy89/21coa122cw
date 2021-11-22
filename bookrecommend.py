@@ -23,13 +23,16 @@ popularity of the title.
 from tkinter import *
 from typing import Callable
 
-import matplotlib.patches as mpatches
+from matplotlib import pyplot as plt, patches as mpatches
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, \
     NavigationToolbar2Tk
 from matplotlib.figure import Figure
 
 import database
+
+plt.style.use('Solarize_Light2')
+plt.style.use('dark_background')
 
 frame: LabelFrame = None
 id_entry: Entry = None
@@ -145,9 +148,10 @@ def _recommend():
 
     sorted_genres: list[str] = recommend_genres(member_id)
 
-    genre_popularities: dict[str, int] = {genre: (pop + 1) * 6 for pop, genre in enumerate(reversed(sorted_genres))}
+    genre_popularities: dict[str, int] = {genre: (pop + 1) * 6 for pop, genre in
+                                          enumerate(reversed(sorted_genres))}
 
-    titles_with_scores: dict[str, int] = {}
+    titles_with_scores = dict[str, int]()
     # generate scores for each title
     for genre in sorted_genres:
         titles: list[tuple[str, int]] = recommend_titles_for_genre(genre)
@@ -204,7 +208,7 @@ def _reset_figure():
     """
     ax.clear()
     # axes.clear also removes settings so we have to re-set them
-    ax.set_title('Recommendations for member')
+    ax.set_title('Recommendations')
     ax.set_xlabel('Book')
     ax.set_ylabel('Popularity')
     ax.tick_params(labelbottom=False)  # don't show x-axis values
@@ -230,9 +234,9 @@ def _add_legend(titles: list[str]):
 
     :param titles: the recommended titles
     """
-    patches = [mpatches.Patch(color=bar_colours[idx], label=title)
-               for idx, title in enumerate(titles)]
-    ax.legend(handles=patches)
+    patches = [mpatches.Patch(color=col, label=title)
+               for col, title in zip(bar_colours, titles)]
+    ax.legend(handles=patches, loc='best')
 
 
 def _plot(titles: list[str], popularities: list[int]):
@@ -246,14 +250,14 @@ def _plot(titles: list[str], popularities: list[int]):
 
     _add_legend(titles)
 
-    x_axis = list(range(len(titles)))
+    x_axis = range(len(titles))
 
     # make bar chart
-    bars = ax.bar(x_axis, popularities, width=.5)
+    bars = ax.bar(x_axis, popularities, width=.7)
 
     # set bar colour according to legend to show which title the bar represents
-    for idx, bar in enumerate(bars):
-        bar.set_color(bar_colours[idx])
+    for bar, col in zip(bars, bar_colours):
+        bar.set_color(col)
 
     canvas.draw()
 
@@ -271,7 +275,7 @@ def recommend_genres(member_id: str) -> list[str]:
 
     # key = genre
     # value = no. of books involved in transactions
-    genres: dict[str, int] = {}
+    genres = dict[str, int]()
     for log in member_logs:
         book = database.search_book_by_id(log['book_id'])
         genre = book['genre']
@@ -301,7 +305,7 @@ def recommend_titles_for_genre(genre: str) -> list[tuple[str, int]]:
     # popularity is per title not per individual copy of book, so we need to
     # basically put each copy of a title together
     #                    title, ids
-    books_by_title: dict[str, set[int]] = {}
+    books_by_title = dict[str, set[int]]()
     for book_id, book in books.items():
         title = book['title']
         if books_by_title.get(title) is None:
@@ -309,8 +313,8 @@ def recommend_titles_for_genre(genre: str) -> list[tuple[str, int]]:
         else:
             books_by_title[title].add(book_id)
 
-    titles_with_popularity: list[tuple[str, int]] = []
     # calculate the popularity of each title
+    titles_with_popularity = list[tuple[str, int]]()
     for title, ids in books_by_title.items():
         popularity = sum(_book_popularity_id(book_id) for book_id in ids)
         titles_with_popularity.append((title, popularity))
@@ -319,6 +323,7 @@ def recommend_titles_for_genre(genre: str) -> list[tuple[str, int]]:
                                                         key=lambda tup: tup[1],
                                                         reverse=True)
 
+    # limit to 10 titles
     if len(most_popular_titles) > 10:
         most_popular_titles = most_popular_titles[:10]
 

@@ -26,6 +26,7 @@ The logfile is represented as a list[dict].
 """
 
 import csv
+from functools import cache
 from datetime import datetime, timedelta
 
 DATE_FORMAT = '%d/%m/%Y'
@@ -114,9 +115,7 @@ def _read_logfile() -> list[dict]:
         for log in reader:
             log['book_id'] = int(log['book_id'])
             log['checkout'] = str_to_date(log['checkout'])
-
-            log['return'] = str_to_date(r) if len(r := log['return']) != 0 \
-                else None
+            log['return'] = str_to_date(r) if (r := log['return']) else None
 
             result.append(log)
 
@@ -198,6 +197,7 @@ def is_more_than_60_days_ago(date: datetime) -> bool:
     return NOW - date > SIXTY_DAYS
 
 
+@cache
 def str_to_date(s: str) -> datetime:
     """
     Convert a string to a datetime object according to a DD/MM/YYYY format.
@@ -208,6 +208,7 @@ def str_to_date(s: str) -> datetime:
     return datetime.strptime(s, DATE_FORMAT)
 
 
+@cache
 def date_to_str(d: datetime) -> str:
     """
     Convert a datetime object to a string with DD/MM/YYYY format as it is more
@@ -227,15 +228,18 @@ logs: list[dict] = _read_logfile()
 
 
 # tests
-if __name__ == "__main__":
+def main():
+    """
+    Main method which contains test code for this module.
+    """
     # test book keys
-    if len(books) != 0:
+    if books:
         _book = next(iter(books.values()))
         assert sorted(book_headers) == sorted(list(_book.keys())), \
             'book_headers and book keys are inconsistent'
 
     # test log keys
-    if len(logs) != 0:
+    if logs:
         _log = logs[0]
         assert sorted(log_headers) == sorted(list(_log.keys())), \
             'log_headers and log keys are inconsistent'
@@ -252,8 +256,8 @@ if __name__ == "__main__":
     assert _log['checkout'] is not None, 'new_log [checkout] is None'
     assert _log['return'] is None, 'new_log: [return] is not None'
 
-    print('len(books):', len(books))
-    print('len(logs):', len(logs))
+    print(f'{len(books) = }')
+    print(f'{len(logs) = }')
 
     # print('Book 11 title:', search_book_by_id(11)['title'])
     # print(logs)
@@ -279,3 +283,7 @@ if __name__ == "__main__":
         'log_is_on_loan failed for not on loan'
 
     print('database.py has passed all tests!')
+
+
+if __name__ == "__main__":
+    main()

@@ -2,11 +2,12 @@
 This module provides the functionality for searching for books, this is done by
 using the database module to query the book database.
 
-TODO: add ignore case
+The search function allows casing to be ignored and to search for books whose
+title contains the given search query.
 """
 
 from tkinter import *
-from tkinter.ttk import Treeview, Style
+from tkinter.ttk import Treeview
 from typing import Callable
 
 import database
@@ -15,11 +16,11 @@ from database import date_to_str
 frame: LabelFrame = None
 
 title_entry: Entry = None
-ignore_case = False
+ignore_case: IntVar = None
+contains: IntVar = None
 
 results_wrapper: Frame = None
 tree: Treeview = None
-style: Style = None
 
 
 def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
@@ -33,6 +34,8 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     """
     global frame
     global title_entry
+    global ignore_case
+    global contains
     global results_wrapper
 
     if frame is not None:
@@ -42,18 +45,18 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     bg = "black"
 
     frame = LabelFrame(parent, text="Book Search", padx=5, pady=5, bg=bg,
-                       fg="white")
+                       fg='white')
 
-    Button(frame, text="Back", fg="crimson",
+    Button(frame, text="Back", fg='crimson',
            command=lambda: _back(back_to_menu)).pack()
 
     # embed a frame for a label and title_entry so they can be side-by-side
     # without affecting rest of layout
     title_frame = Frame(frame, bg=bg)
 
-    Label(title_frame, text="Enter book title:", bg=bg, fg="white").grid(
+    Label(title_frame, text="Enter book title:", bg=bg, fg='white').grid(
         row=0, column=0)
-    title_entry = Entry(title_frame, bg="white", fg=bg, width=30, borderwidth=1)
+    title_entry = Entry(title_frame, bg='white', fg=bg, width=30, borderwidth=1)
     title_entry.focus_set()
     # search when enter is pressed
     title_entry.bind('<Return>', lambda event: _search())
@@ -61,12 +64,20 @@ def get_frame(parent, back_to_menu: Callable) -> LabelFrame:
     title_entry.bind('<Escape>', lambda event: _back(back_to_menu))
 
     title_entry.grid(row=0, column=1)
-    title_frame.pack(pady=10)
+    title_frame.pack(pady=7)
 
-    Checkbutton(frame, text="Ignore case", bg=bg, fg="white",
-                command=_invert_ignore_case).pack()
+    ignore_case = IntVar()
+    Checkbutton(frame, text="Ignore case", bg='white', fg=bg,
+                activebackground='white', activeforeground=bg,
+                variable=ignore_case).pack(pady=5)
 
-    Button(frame, text="Search", command=_search).pack()
+    contains = IntVar()
+    Checkbutton(frame, text="Contains", bg='white', fg=bg,
+                activebackground='white', activeforeground=bg,
+                variable=contains).pack(pady=5)
+
+    Button(frame, text="Search", font='sans 12 bold', command=_search) \
+        .pack(pady=5)
 
     _generate_results_view()
 
@@ -91,8 +102,6 @@ def _generate_results_view():
     global results_wrapper
     global tree
 
-    _fix_treemap_color()
-
     headers = ('ID', 'Genre', 'Title', 'Author', 'Purchase Date', 'Member')
 
     results_wrapper = Frame(frame)
@@ -111,39 +120,16 @@ def _generate_results_view():
     sb.grid(row=0, column=1, sticky='ns')
 
 
-def _fix_treemap_color():
-    """
-    Fix a Tkinter big, see https://stackoverflow.com/a/57009674/17381629.
-    """
-    global style
-
-    fixed_map = lambda option: \
-        [elm for elm in style.map('Treeview', query_opt=option)
-         if elm[:2] != ('!disabled', '!selected')]
-
-    style = Style()
-    style.map('Treeview', foreground=fixed_map('foreground'),
-              background=fixed_map('background'))
-
-
-def _invert_ignore_case():
-    """
-    Invert the boolean ignore_case variable.
-    """
-    global ignore_case
-    ignore_case = not ignore_case
-
-
 def _search():
     """
     Perform a search then display the results on screen.
     """
     _clear_results()
 
-    print(ignore_case)
-
     title = title_entry.get()
-    results: list[dict] = _search_by_title(title)
+
+    results: list[dict] = _search_by_title(title, ignore_case.get(),
+                                           contains.get())
 
     for book in results:
         tags = ('highlight',) if _should_highlight(book) else ()
@@ -182,22 +168,26 @@ def _clear_results():
     tree.delete(*tree.get_children())
 
 
-def _search_by_title(title, _ignore_case=False) -> list[dict]:
+def _search_by_title(title, ignore_case=False, contains=False) -> list[dict]:
     """
-    Return all books with the given title.
+    Return all books with the given title, ignoring casing if specified.
 
     :param title: the search param
-    :param _ignore_case: whether to ignore title case
+    :param ignore_case: whether to ignore casing or not
+    :param contains: if True, return books that contain the given query, else
+                     return books whose title is exactly the query
     :return: list of books with the given title
     """
+    get_book_title = lambda book: book['title'] if not ignore_case else \
+        book['title'].casefold()
+    is_valid_title = lambda title, query: title == query if not contains else \
+        query in title
+
     if ignore_case:
         title = title.casefold()
-        result = {book_id: book for (book_id, book) in database.books.items()
-                  if book['title'].casefold() == title}
-    else:
-        result: dict[int, dict] = database.search_books_by_param('title', title)
 
-    return list(result.values())
+    return [book for book in database.books.values()
+            if is_valid_title(get_book_title(book), title)]
 
 
 def _should_highlight(book: dict) -> bool:
@@ -219,26 +209,34 @@ def _should_highlight(book: dict) -> bool:
 
 
 # tests
-if __name__ == "__main__":
+def main():
+    """
+    Main method which contains test code for this module.
+    """
     f = lambda results: (
         [book for book in results if _should_highlight(book)],
         [book for book in results if not _should_highlight(book)]
     )
 
-    # len(highlight) = 6, len(normal) = 4
-    _highlight, _normal = f(_search_by_title(title="Sinful Duty"))
-    assert len(_highlight) == 6 and len(_normal) == 4, \
-        'search failed for Sinful Duty'
+    # len(highlight) = 2, len(normal) = 1
+    highlight, normal = f(_search_by_title(title="Sinful Duty"))
+    assert len(highlight) == 2 and len(normal) == 1, \
+        "search failed for 'Sinful Duty'"
 
-    # len(highlight) = 8, len(normal) = 2
-    _highlight, _normal = f(
-        _search_by_title(title="Secret of the Misshapen Headmaster")
+    # len(highlight) = 0, len(normal) = 3
+    highlight, normal = f(
+        _search_by_title(title="Soldier of Impact")
     )
-    assert len(_highlight) == 8 and len(_normal) == 2, \
-        'search failed for Secret of the Misshapen Headmaster'
+    assert len(highlight) == 0 and len(normal) == 3, \
+        "'search failed for 'Soldier of Impact'"
 
-    # len(highlight) = 9, len(normal) = 11
-    _highlight, _normal = f(_search_by_title(title="Avengers"))
-    assert len(_highlight) and len(_normal) == 9, 'search failed for Avengers'
+    # len(highlight) = 1, len(normal) = 2
+    highlight, normal = f(_search_by_title(title="Avengers"))
+    assert len(highlight) == 1 and len(normal) == 2, \
+        "search failed for 'Avengers'"
 
     print('booksearch.py has passed all tests!')
+
+
+if __name__ == "__main__":
+    main()

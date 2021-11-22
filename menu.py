@@ -10,9 +10,10 @@ a specific frame to the top of the stacking order, displaying it and effectively
 hiding the others.
 See: https://stackoverflow.com/a/7557028
 """
-
+import modulefinder
 from tkinter import *
 from tkinter.font import Font
+from tkinter import ttk
 
 import bookcheckout
 import bookrecommend
@@ -24,10 +25,12 @@ root.title('Library Management System')
 root.geometry('800x600')
 root.attributes('-topmost', True)  # always on top
 
+"""
 container = Frame(root)
 container.pack(side="top", fill="both", expand=True)
 container.grid_rowconfigure(0, weight=1)
 container.grid_columnconfigure(0, weight=1)
+"""
 
 bg = 'black'
 fg = 'white'
@@ -95,6 +98,36 @@ def configure_font(label: Label, **options):
     label.configure(font=font)
 
 
+def noop(): pass
+
+
+style = ttk.Style()
+style.configure('TNotebook', background='black')
+style.theme_use('clam')
+
+notebook = ttk.Notebook(root)
+notebook.pack(side=TOP, fill=BOTH, expand=True)
+
+modules = [
+    booksearch,
+    bookcheckout,
+    bookreturn,
+    bookrecommend
+]
+
+for module in modules:
+    frame = module.get_frame(notebook, noop)
+    frame.pack(side=TOP, fill=BOTH, expand=True)
+    notebook.add(frame, text=module.__name__[4:].capitalize())
+
+"""
+notebook.add(booksearch.get_frame(notebook, noop), text="Search")
+notebook.add(bookcheckout.get_frame(notebook, noop), text="Checkout")
+notebook.add(bookreturn.get_frame(notebook, noop), text="Return")
+notebook.add(bookrecommend.get_frame(notebook, noop), text="Recommend")
+"""
+
+"""
 menu = LabelFrame(container, text="Main Menu", bg=bg, fg=fg)
 menu.configure(padx=5, pady=10)
 
@@ -114,6 +147,7 @@ recommend_button.pack(pady=5)
 
 setup_frame(menu)
 show_frame(menu)
+"""
 
 if __name__ == "__main__":
     root.mainloop()

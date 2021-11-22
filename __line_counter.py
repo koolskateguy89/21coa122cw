@@ -13,7 +13,6 @@ path = '.'
 files = [f for f in listdir(path) if isfile(join(path, f))]
 files = [f for f in files if not f.startswith('__') and f.endswith('.py')]
 
-
 sum_ = 0
 lens = {}
 for f in files:
@@ -21,7 +20,7 @@ for f in files:
         lines = file_len(f)
         sum_ += lines
         lens[f] = lines
-    except:
+    except Exception:
         print('\t' + f)
         pass
 

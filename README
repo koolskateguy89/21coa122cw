@@ -1,4 +1,9 @@
 max 500 words
-Developed with Python v3.9.7
 
-Search Money Talks for highlight + non-highlight
+Developed with Python v3.10.0
+Minimum Python v3.10.0 needed
+
+Additional features:
+- Book searching
+  - Ignore case
+  - Contains

@@ -66,7 +66,16 @@ member-ID is 4 letters - first part of email address (e.g.: “coai” for coai@
 
 ## Notes
 
-Needs tests at the end of each module
+Need tests at the end of each module
+
+## Extra features
+
+- booksearch.py
+  - [x] ignore case
+  - [x] contains
+- bookcheckout.py
+- bookreturn.py
+- bookrecommend.py
 
 
 ## database

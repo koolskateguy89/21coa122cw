@@ -3,6 +3,9 @@ This modules provides functionality for the librarian to return books. It asks
 for the ID of the books they wish to return and either displays an appropriate
 error message or a message letting them know the books have been successfully
 returned.
+
+When a book is returned, the most recent transaction log for that book is
+updated with a return date to signify that the book has been returned.
 """
 
 from datetime import datetime
@@ -115,7 +118,7 @@ def _hide_status():
     status_frame.pack_forget()
 
 
-def return_book(*book_ids: int) -> tuple[str or None, str or None]:
+def return_book(*book_ids: int) -> tuple[str | None, str | None]:
     """
     Try to return given books, update the database and logfile if successful.
 
@@ -153,14 +156,14 @@ def return_book(*book_ids: int) -> tuple[str or None, str or None]:
     return None, _success(returned)
 
 
-def _success(returned: list[str]) -> str or None:
+def _success(returned: list[str]) -> str | None:
     """
     Update database files if books have been returned.
 
     :param returned: the ids of returned books
     :return: 'success message' of return_book
     """
-    if len(returned) == 0:
+    if not returned:
         return None
 
     database.update_logfile()
@@ -170,7 +173,10 @@ def _success(returned: list[str]) -> str or None:
 
 
 # tests
-if __name__ == "__main__":
+def main():
+    """
+    Main method which contains test code for this module.
+    """
     # Modify database methods so files aren't modified while testing
     database.update_database = lambda: None
     database.update_logfile = lambda: None
@@ -179,6 +185,10 @@ if __name__ == "__main__":
 
     assert _success([]) is None, '_success failed for empty list'
 
-    print('return_book(1):', return_book(1))
+    print(f'{return_book(1) = }')
 
     print('bookreturn.py has passed all tests!')
+
+
+if __name__ == "__main__":
+    main()

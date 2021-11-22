@@ -156,9 +156,9 @@ def _hide_status():
     status_frame.pack_forget()
 
 
-def checkout_book(member_id: str, *book_ids: int) -> tuple[str or None,
-                                                           str or None,
-                                                           str or None]:
+def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
+                                                           str | None,
+                                                           str | None]:
     """
     Withdraw given book(s) to a given member, update the database and logfile.
 
@@ -172,7 +172,7 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str or None,
     if len(member_id) != 4:
         return error(f"Error: Invalid member ID: '{member_id}'")
 
-    if len(book_ids) == 0:
+    if not book_ids:
         return error('No books to checkout')
 
     for book_id in book_ids:
@@ -199,21 +199,21 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str or None,
 
     warning_msg = None
 
-    if len(held_book_ids) != 0:
+    if held_book_ids:
         warning_msg = f"Book(s) {{{','.join(held_book_ids)}}} are being held" \
                       " for more than 60 days"
 
     return None, warning_msg, _success(withdrawn)
 
 
-def _success(withdrawn: list[str]) -> str or None:
+def _success(withdrawn: list[str]) -> str | None:
     """
     Update database files if books have been withdrawn.
 
     :param withdrawn: the ids of withdrawn books
     :return: 'success message' of checkout_book
     """
-    if len(withdrawn) == 0:
+    if not withdrawn:
         return None
 
     database.update_logfile()
@@ -223,19 +223,26 @@ def _success(withdrawn: list[str]) -> str or None:
 
 
 # tests
-if __name__ == "__main__":
+def main():
+    """
+    Main method which contains test code for this module.
+    """
     # Modify database methods so files aren't modified while testing
     database.update_database = lambda: None
     database.update_logfile = lambda: None
 
-    print("checkout_book('suii', *[7, 8]:\t", checkout_book('suii', *[7, 8]))
+    print(f"{checkout_book('suii', *[7, 8]) = }")
 
-    print("checkout_book('util', 5):\t", checkout_book('util', 5))
+    print(f"{checkout_book('util', 5) = }")
 
-    print("checkout_book('coaa', 11):\t", checkout_book('coaa', 11))
+    print(f"{checkout_book('coaa', 11) = }")
 
     assert _success([]) is None, '_success failed for empty list'
     assert _success(['1']) == 'Book(s) {1} withdrawn', \
         '_success failed for non-empty list'
 
     print('bookcheckout.py has passed all tests!')
+
+
+if __name__ == "__main__":
+    main()
