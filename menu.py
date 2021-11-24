@@ -22,10 +22,10 @@ modules = {
     'Recommend': bookrecommend
 }
 
-bg, fg = 'black', 'white'
-
 menu: LabelFrame = None
 notebook: ttk.Notebook = None
+
+bg, fg = 'black', 'white'
 
 
 def _on_tab_selected(event):
@@ -68,7 +68,6 @@ def _show_frame(frame):
 def _menu_button(text, module) -> Button:
     """
     Return a standardised Button that acts as a menu option.
-
     :param text: the button text
     :param module: the module the button will open
     :return: a decorated button
@@ -85,12 +84,12 @@ def main():
     global notebook
 
     # puts all container Frames on top of each other
-    setup_frame = lambda f: f.grid(row=0, column=0, sticky="nsew")
+    setup_frame = lambda f: f.grid(row=0, column=0, sticky=NSEW)
 
     root = Tk()
     root.title('Library Management System')
     root.geometry('800x600')
-    root.attributes('-topmost', True)  # always on top
+    # root.attributes('-topmost', True)  # always on top
 
     container = Frame(root)
     container.pack(side=TOP, fill=BOTH, expand=True)
@@ -108,7 +107,7 @@ def main():
     font.configure(underline=True)
     title_label.configure(font=font)
 
-    # set notebook background
+    # set notebook background to bg
     style = ttk.Style()
     style.theme_use('clam')
     style.configure('TNotebook', background=bg)
@@ -119,13 +118,12 @@ def main():
 
     # add a menu button and tab for each module
     for text, module in modules.items():
-        button = _menu_button(text, module)
-        button.pack(pady=5)
+        _menu_button(text, module).pack(pady=5)
 
         frame = module.get_frame(notebook)
         notebook.add(frame, text=text)
 
-    # add a tab to go back to the main menu
+    # add a tab to facilitate going back to the main menu
     notebook.add(Frame(notebook, bg=bg), text='   Main Menu')
 
     _show_frame(menu)
