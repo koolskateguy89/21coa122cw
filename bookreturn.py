@@ -118,10 +118,10 @@ def return_book(*book_ids: int) -> tuple[str | None, str | None]:
         if book is None:
             return f"No book with ID: {book_id}", _success(returned)
 
-        if book['member'] == '0':
+        if book.member == '0':
             return f"Book {book_id} already returned", _success(returned)
 
-        book['member'] = '0'
+        book.member = '0'
 
         book_logs: list[dict] = database.logs_for_book_id(book_id)
 

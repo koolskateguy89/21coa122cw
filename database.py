@@ -2,7 +2,7 @@
 This module contains functions that other modules can use to interact with the
 book database and logfile. This module also contains utility functions.
 
-Books are represented by dicts:
+Books are represented by SimpleNamespaces, mimicking a class:
     'id': int
     'genre': str
     'title': str
@@ -10,9 +10,9 @@ Books are represented by dicts:
     'purchase_date': datetime.datetime
     'member': str
 
-The book database is represented as a dict[int, dict]
+The book database is represented as a dict[int, SimpleNamespace]
     key = book_id
-    value = book (dict)
+    value = book (SimpleNamespace)
 
 
 Logs are also represented by dicts:
@@ -26,8 +26,9 @@ The logfile is represented as a list[dict].
 """
 
 import csv
-from functools import cache
 from datetime import datetime, timedelta
+from functools import cache
+from types import SimpleNamespace
 
 DATE_FORMAT = '%d/%m/%Y'
 SIXTY_DAYS = timedelta(days=60)
@@ -36,7 +37,7 @@ NOW = datetime.now()
 
 # Book database
 
-def _read_database() -> dict[int, dict]:
+def _read_database() -> dict[int, SimpleNamespace]:
     """
     Read the database file and parse it into a dictionary.
 
@@ -45,7 +46,7 @@ def _read_database() -> dict[int, dict]:
     result = {}
 
     with open('database.txt', newline='') as db:
-        reader = csv.DictReader(db, fieldnames=book_headers)
+        reader = csv.DictReader(db, fieldnames=BOOK_HEADERS)
         # skip header
         next(reader)
 
@@ -53,7 +54,7 @@ def _read_database() -> dict[int, dict]:
             book['id'] = int(book['id'])
             book['purchase_date'] = str_to_date(book['purchase_date'])
 
-            result[book['id']] = book
+            result[book['id']] = SimpleNamespace(**book)
 
     return result
 
@@ -63,19 +64,19 @@ def update_database():
     Update the database file.
     """
     with open('database.txt', 'w', newline='') as db:
-        writer = csv.DictWriter(db, fieldnames=book_headers)
+        writer = csv.DictWriter(db, fieldnames=BOOK_HEADERS)
         writer.writeheader()
         for book in books.values():
             # write the purchase date in appropriate format to file
-            book = {**book,
-                    'purchase_date': date_to_str(book['purchase_date'])
+            book = {**vars(book),
+                    'purchase_date': date_to_str(book.purchase_date)
                     }
             writer.writerow(book)
 
 
 # Searching for books
 
-def search_books_by_param(param: str, value: str) -> dict[int, dict]:
+def search_books_by_param(param: str, value: str) -> dict[int, SimpleNamespace]:
     """
     Return books that match the given parameter.
 
@@ -83,10 +84,11 @@ def search_books_by_param(param: str, value: str) -> dict[int, dict]:
     :param value: the desired
     :return: books that match the parameter
     """
-    return {book_id: book for (book_id, book) in books.items() if book[param] == value}
+    return {book_id: book for (book_id, book) in books.items()
+            if getattr(book, param) == value}
 
 
-def search_book_by_id(book_id: int) -> dict:
+def search_book_by_id(book_id: int) -> SimpleNamespace:
     """
     Return the book with the given id.
 
@@ -107,7 +109,7 @@ def _read_logfile() -> list[dict]:
     result = []
 
     with open('logfile.txt', newline='') as logfile:
-        reader = csv.DictReader(logfile, fieldnames=log_headers)
+        reader = csv.DictReader(logfile, fieldnames=LOG_HEADERS)
         # skip header
         next(reader)
 
@@ -127,7 +129,7 @@ def update_logfile():
     Update the logfile.
     """
     with open('logfile.txt', 'w', newline='') as logfile:
-        writer = csv.DictWriter(logfile, fieldnames=log_headers)
+        writer = csv.DictWriter(logfile, fieldnames=LOG_HEADERS)
         writer.writeheader()
 
         for log in logs:
@@ -220,10 +222,10 @@ def date_to_str(d: datetime) -> str:
     return datetime.strftime(d, DATE_FORMAT)
 
 
-book_headers = ['id', 'genre', 'title', 'author', 'purchase_date', 'member']
-books: dict[int, dict] = _read_database()
+BOOK_HEADERS = ('id', 'genre', 'title', 'author', 'purchase_date', 'member')
+books: dict[int, SimpleNamespace] = _read_database()
 
-log_headers = ['book_id', 'checkout', 'return', 'member']
+LOG_HEADERS = ('book_id', 'checkout', 'return', 'member')
 logs: list[dict] = _read_logfile()
 
 
@@ -235,14 +237,14 @@ def main():
     # test book keys
     if books:
         _book = next(iter(books.values()))
-        assert sorted(book_headers) == sorted(list(_book.keys())), \
-            'book_headers and book keys are inconsistent'
+        assert sorted(BOOK_HEADERS) == sorted(list(vars(_book).keys())), \
+            'BOOK_HEADERS and book keys are inconsistent'
 
     # test log keys
     if logs:
         _log = logs[0]
-        assert sorted(log_headers) == sorted(list(_log.keys())), \
-            'log_headers and log keys are inconsistent'
+        assert sorted(LOG_HEADERS) == sorted(list(_log.keys())), \
+            'LOG_HEADERS and log keys are inconsistent'
 
     # test reading book database
     assert _read_database() == books, '_read_database failed test'
@@ -259,7 +261,7 @@ def main():
     print(f'{len(books) = }')
     print(f'{len(logs) = }')
 
-    # print('Book 11 title:', search_book_by_id(11)['title'])
+    # print('Book 11 title:', search_book_by_id(11).title)
     # print(logs)
 
     # test date functions
@@ -287,3 +289,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    LOG_HEADERS = 2

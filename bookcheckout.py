@@ -120,7 +120,8 @@ def _show_warning(msg):
 
 def _show_status(title, msg, colour):
     """
-    Make the status frame visible and configure it to show the given message.
+    Make the status frame visible and configure it to show the given message
+    with the given title and given background colour to denote the status type.
 
     :param title: the status type
     :param msg: the status message
@@ -164,11 +165,10 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
         if book is None:
             return error(f"No book with ID: {book_id}")
 
-        if (member := book['member']) != '0':
-            return error("Book %s already on loan, to '%s'" %
-                         (book_id, member))
+        if (member := book.member) != '0':
+            return error(f"Book {book_id} is already on loan, to '{member}'")
 
-        book['member'] = member_id
+        book.member = member_id
         log = database.new_log(book_id, member_id)
         database.logs.append(log)
 
@@ -184,7 +184,7 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
 
     if held_book_ids:
         warning_msg = f"Book(s) {{{','.join(held_book_ids)}}} are being held" \
-                      " for more than 60 days"
+                      f"for more than 60 days"
 
     return None, warning_msg, _success(withdrawn)
 

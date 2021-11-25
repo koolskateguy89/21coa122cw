@@ -21,6 +21,7 @@ popularity of the title.
 """
 
 from tkinter import *
+from types import SimpleNamespace
 
 from matplotlib import pyplot as plt, patches as mpatches
 from matplotlib.axes import Axes
@@ -64,8 +65,8 @@ def get_frame(parent) -> LabelFrame:
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
 
-    Label(input_frame, text="Enter member ID:", bg=bg, fg='white').grid(
-        row=0, column=0, pady=7)
+    Label(input_frame, text="Enter member ID:", bg=bg, fg='white') \
+        .grid(row=0, column=0, pady=7)
     id_entry = Entry(input_frame, borderwidth=3)
     id_entry.focus_set()
     id_entry.grid(row=0, column=1)
@@ -262,7 +263,7 @@ def recommend_genres(member_id: str) -> list[str]:
     genres = dict[str, int]()
     for log in member_logs:
         book = database.search_book_by_id(log['book_id'])
-        genre = book['genre']
+        genre = book.genre
 
         if genres.get(genre) is None:
             genres[genre] = 1
@@ -284,14 +285,15 @@ def recommend_titles_for_genre(genre: str) -> list[tuple[str, int]]:
     :param genre: the genre to check for
     :return: a sorted list of (title, popularity) for the genre
     """
-    books: dict[int, dict] = database.search_books_by_param('genre', genre)
+    books: dict[int, SimpleNamespace] = database.search_books_by_param('genre',
+                                                                       genre)
 
     # popularity is per title not per individual copy of book, so we need to
     # basically put each copy of a title together
     #                    title, ids
     books_by_title = dict[str, set[int]]()
     for book_id, book in books.items():
-        title = book['title']
+        title = book.title
         if books_by_title.get(title) is None:
             books_by_title[title] = {book_id}
         else:
