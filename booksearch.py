@@ -74,7 +74,7 @@ def get_frame(parent) -> LabelFrame:
     Button(frame, text="Search", font='sans 12 bold', command=_search) \
         .pack(pady=5)
 
-    _generate_results_view()
+    _decorate_results_view()
 
     return frame
 
@@ -87,7 +87,7 @@ def on_show():
     query_entry.focus_set()
 
 
-def _generate_results_view():
+def _decorate_results_view():
     """
     Generate the widgets which will directly display the results, ready to be
     added to the main frame.
