@@ -29,3 +29,6 @@ Additional features:
   - Search by any book attribute
   - Ignore case
   - Contains
+
+The test code may give false negatives if the database or logfile have been
+modified.
