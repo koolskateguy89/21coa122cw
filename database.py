@@ -26,12 +26,11 @@ The logfile is represented as a list[dict].
 """
 
 import csv
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import cache
 from types import SimpleNamespace
 
 DATE_FORMAT = '%d/%m/%Y'
-SIXTY_DAYS = timedelta(days=60)
 NOW = datetime.now()
 
 
@@ -67,24 +66,23 @@ def update_database():
         writer = csv.DictWriter(db, fieldnames=BOOK_HEADERS)
         writer.writeheader()
         for book in books.values():
+            book_ = vars(book)
             # write the purchase date in appropriate format to file
-            book = {**vars(book),
-                    'purchase_date': date_to_str(book.purchase_date)
-                    }
-            writer.writerow(book)
+            book_['purchase_date'] = date_to_str(book.purchase_date)
+            writer.writerow(book_)
 
 
 # Searching for books
 
-def search_books_by_param(param: str, value: str) -> dict[int, SimpleNamespace]:
+def search_books_by_param(param: str, value) -> dict[int, SimpleNamespace]:
     """
     Return books that match the given parameter.
 
     :param param: the property of the book to check
-    :param value: the desired
+    :param value: the value to check the property is equal to
     :return: books that match the parameter
     """
-    return {book_id: book for (book_id, book) in books.items()
+    return {book_id: book for book_id, book in books.items()
             if getattr(book, param) == value}
 
 
@@ -196,7 +194,7 @@ def is_more_than_60_days_ago(date: datetime) -> bool:
     :param date: the date to check
     :return: whether the given date was more than 60 days ago or not
     """
-    return NOW - date > SIXTY_DAYS
+    return (NOW - date).days > 60
 
 
 @cache

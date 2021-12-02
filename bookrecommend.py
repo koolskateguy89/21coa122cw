@@ -131,19 +131,20 @@ def _recommend():
         _show_error(f"Invalid member ID: '{member_id}'")
         return
 
+    # TODO: if member hasn't read any books or smthn, recommend the 3 most popular Action/... books
     sorted_genres: list[str] = recommend_genres(member_id)
 
-    genre_popularities: dict[str, int] = {genre: (pop + 1) * 6 for pop, genre in
+    genre_popularities: dict[str, int] = {genre: (idx + 1) * 6 for idx, genre in
                                           enumerate(reversed(sorted_genres))}
 
     titles_with_scores = dict[str, int]()
-    # generate scores for each title
+    # generate scores for each title in each genre
     for genre in sorted_genres:
         titles: list[tuple[str, int]] = recommend_titles_for_genre(genre)
         genre_score = genre_popularities[genre]
 
-        for title, pop in titles:
-            titles_with_scores[title] = pop * genre_score
+        for title, title_pop in titles:
+            titles_with_scores[title] = title_pop * genre_score
 
     # sort titles by score (popularity)
     sorted_titles: list[tuple[str, int]] = sorted(titles_with_scores.items(),
@@ -153,9 +154,9 @@ def _recommend():
     if len(sorted_titles) < 3:
         _show_error(f"Cannot recommend books for '{member_id}'")
         return
+
     # can only show at most 10 titles
-    elif len(sorted_titles) > 10:
-        sorted_titles = sorted_titles[:10]
+    sorted_titles = sorted_titles[:10]
 
     # see https://stackoverflow.com/a/69878556/17381629
     _plot(*zip(*sorted_titles))
@@ -285,30 +286,18 @@ def recommend_titles_for_genre(genre: str) -> list[tuple[str, int]]:
     books: dict[int, SimpleNamespace] = database.search_books_by_param('genre',
                                                                        genre)
 
-    # popularity is per title not per individual copy of book, so we need to
-    # basically put each copy of a title together
-    #                    title, ids
-    books_by_title = dict[str, set[int]]()
+    # calculate how popular each title is by summing the popularity of each copy
+    title_pops = dict[str, int]()
     for book_id, book in books.items():
-        title = book.title
-        if books_by_title.get(title) is None:
-            books_by_title[title] = {book_id}
-        else:
-            books_by_title[title].add(book_id)
+        pop = _book_popularity_id(book_id)
+        title_pops[book.title] = title_pops.get(book.title, 0) + pop
 
-    # calculate the popularity of each title
-    titles_with_popularity = list[tuple[str, int]]()
-    for title, ids in books_by_title.items():
-        popularity = sum(_book_popularity_id(book_id) for book_id in ids)
-        titles_with_popularity.append((title, popularity))
-
-    most_popular_titles: list[tuple[str, int]] = sorted(titles_with_popularity,
+    most_popular_titles: list[tuple[str, int]] = sorted(title_pops.items(),
                                                         key=lambda tup: tup[1],
                                                         reverse=True)
 
     # limit to 10 titles
-    if len(most_popular_titles) > 10:
-        most_popular_titles = most_popular_titles[:10]
+    most_popular_titles = most_popular_titles[:10]
 
     return most_popular_titles
 

@@ -46,10 +46,9 @@ def get_frame(parent) -> LabelFrame:
     global contains
     global results_wrapper
 
-    bg, fg = 'black', 'white'
+    bg, fg = 'black', '#f8f8ff'
 
-    frame = LabelFrame(parent, text="Book Search", padx=5, pady=5, bg=bg,
-                       fg=fg)
+    frame = LabelFrame(parent, text="Book Search", padx=5, pady=5, bg=bg, fg=fg)
 
     # embed a frame for user input so its widgets can be side-by-side
     # without affecting rest of layout
@@ -63,7 +62,7 @@ def get_frame(parent) -> LabelFrame:
 
     query = StringVar()
     # search whenever text is entered into query_entry
-    query.trace('w', _search)
+    query.trace_add('write', _search)
     query_entry = Entry(input_frame, bg=fg, fg=bg, width=30, borderwidth=1,
                         textvariable=query)
     query_entry.focus_set()
@@ -73,11 +72,15 @@ def get_frame(parent) -> LabelFrame:
     query_entry.grid(row=0, column=1, padx=5)
 
     ignore_case = IntVar()
+    # search when ignore_case is modified
+    ignore_case.trace_add('write', _search)
     Checkbutton(frame, text="Ignore case", bg=fg, fg=bg,
-                activebackground='white', activeforeground=bg,
+                activebackground=fg, activeforeground=bg,
                 variable=ignore_case).pack(pady=5)
 
     contains = IntVar()
+    # search when contains is modified
+    contains.trace_add('write', _search)
     Checkbutton(frame, text="Contains", bg=fg, fg=bg,
                 activebackground=fg, activeforeground=bg,
                 variable=contains).pack(pady=5)
@@ -131,10 +134,15 @@ def _search(*args):
     :param args: unused varargs to allow this to be used as a callback for
         anything
     """
+    hide_results()
     _clear_results()
 
+    _query = query.get().strip()
+    if not _query:
+        return
+
     results: list[SimpleNamespace] = search_by_param(attr.get(),
-                                                     query.get(),
+                                                     _query,
                                                      ignore_case.get(),
                                                      contains.get())
 
@@ -146,12 +154,13 @@ def _search(*args):
                 # display appropriate string representation of date
                 'purchase_date': date_to_str(book.purchase_date),
                 # if book is available, don't show anyone as member
-                'member': member if (member := book.member) != '0' else ''
+                'member': member if (member := book.member) != '0' else '_'
                 }
 
         tree.insert('', index=END, values=tuple(book.values()), tags=tags)
 
-    display_results()
+    if results:
+        display_results()
 
 
 def display_results():

@@ -38,21 +38,21 @@ def get_frame(parent) -> LabelFrame:
     global status_frame
     global status_label
 
-    bg = 'black'
+    bg, fg = 'black', '#f8f8ff'
 
     frame = LabelFrame(parent, text="Book Checkout", padx=5, pady=5, bg=bg,
-                       fg='#f8f8ff')
+                       fg=fg)
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
 
-    Label(input_frame, text="Enter member ID:", bg=bg, fg='white', width=21,
+    Label(input_frame, text="Enter member ID:", bg=bg, fg=fg, width=21,
           anchor=W).grid(row=0, column=0, pady=7)
     member_entry = Entry(input_frame, borderwidth=3)
     member_entry.focus_set()
     member_entry.grid(row=0, column=1)
 
-    Label(input_frame, text="Enter book IDs (split by ','):", bg=bg, fg='white',
+    Label(input_frame, text="Enter book IDs (split by ','):", bg=bg, fg=fg,
           width=21, anchor=W).grid(row=1, column=0)
     ids_entry = Entry(input_frame, borderwidth=3)
     ids_entry.grid(row=1, column=1)
@@ -62,12 +62,12 @@ def get_frame(parent) -> LabelFrame:
     Button(frame, text="Checkout", command=_checkout).pack(pady=10)
 
     warning_frame = LabelFrame(frame, text="Warning", padx=1, bg='yellow')
-    warning_label = Label(warning_frame, bg=bg, fg='white', wraplength=450,
+    warning_label = Label(warning_frame, bg=bg, fg=fg, wraplength=450,
                           justify=CENTER)
     warning_label.pack()
 
-    status_frame = LabelFrame(frame, padx=1, fg='white')
-    status_label = Label(status_frame, bg=bg, fg='white')
+    status_frame = LabelFrame(frame, padx=1, fg=fg)
+    status_label = Label(status_frame, bg=bg, fg=fg)
     status_label.pack()
 
     return frame
@@ -98,6 +98,7 @@ def _checkout():
 
     error, warning, success = checkout_book(member_id, *ids)
 
+    # FIXME: error and success may not both show
     if error is not None:
         _show_status('Error', error, 'red')
 
@@ -183,8 +184,8 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
     warning_msg = None
 
     if held_book_ids:
-        warning_msg = f"Book(s) {{{','.join(held_book_ids)}}} are being held" \
-                      f"for more than 60 days"
+        warning_msg = f"Book(s) {{{','.join(held_book_ids)}}} are being held " \
+                      "for more than 60 days"
 
     return None, warning_msg, _success(withdrawn)
 

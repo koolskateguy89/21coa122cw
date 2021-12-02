@@ -9,6 +9,7 @@ updated with a return date to signify that the book has been returned.
 """
 
 # TODO:
+
 """
 Enter user ID,
 display the books they have on loan,
@@ -17,14 +18,20 @@ and pick which books to return
 
 from datetime import datetime
 from tkinter import *
+from tkinter import ttk
 
 import database
 
 ids_entry: Entry = None
-status_frame: LabelFrame = None
-status_label: Label = None
 
-id_entry: Entry = None
+error_frame: LabelFrame = None
+error_label: Label = None
+
+success_frame: LabelFrame = None
+success_label: Label = None
+
+member_id_entry: Entry = None
+on_loan_tree: ttk.Treeview = None
 
 
 def get_frame(parent) -> LabelFrame:
@@ -34,31 +41,49 @@ def get_frame(parent) -> LabelFrame:
     :param parent: the parent of the frame
     :return: the fully decorated frame
     """
+    global member_id_entry
+
     global ids_entry
-    global status_frame
-    global status_label
+    global error_frame
+    global error_label
+    global success_frame
+    global success_label
 
-    bg = 'black'
+    bg, fg = 'black', '#f8f8ff'
 
-    frame = LabelFrame(parent, text="Book Return", padx=5, pady=5, bg=bg,
-                       fg='white')
+    frame = LabelFrame(parent, text="Book Return", padx=5, pady=5, bg=bg, fg=fg)
+
+    _create_search_frame(frame, bg)
 
     input_frame = Frame(frame, bg=bg)
-    input_frame.pack()
+    input_frame.grid(column=1)
 
-    Label(input_frame, text="Enter book IDs (split by ','):", bg=bg,
-          fg='white').grid(row=0, column=0)
+    Label(input_frame, text="Enter book IDs (split by ','):", bg=bg, fg=fg) \
+        .grid(row=0, column=0)
     ids_entry = Entry(input_frame, borderwidth=3)
     ids_entry.grid(row=0, column=1)
     # return book when Enter is pressed
     ids_entry.bind('<Return>', lambda event: _return())
 
     return_button = Button(frame, text="Return", command=_return)
-    return_button.pack(pady=10)
+    return_button.grid(column=1, pady=10)
 
-    status_frame = LabelFrame(frame, padx=1, pady=5, fg='white')
-    status_label = Label(status_frame, bg=bg, fg='white')
-    status_label.pack()
+    error_frame = LabelFrame(frame, text="Error", padx=1, pady=5, bg='red',
+                             fg=bg)
+    # configure the error frame's grid options
+    error_frame.grid(row=100, column=1, pady=5);
+    error_frame.grid_remove()
+    error_frame.grid_remove()
+    error_label = Label(error_frame, bg=bg, fg=fg)
+    error_label.pack()
+
+    success_frame = LabelFrame(frame, text="Error", padx=1, pady=5, bg='green',
+                               fg=bg)
+    # configure the success frame's grid options
+    success_frame.grid(row=101, column=1, pady=5);
+    success_frame.grid_remove()
+    success_label = Label(success_frame, bg=bg, fg=fg)
+    success_label.pack()
 
     return frame
 
@@ -71,45 +96,83 @@ def on_show():
     ids_entry.focus_set()
 
 
+def _create_search_frame(root: Frame, bg):
+    global member_id_entry
+    global on_loan_tree
+
+    frame = Frame(root, bg=bg)
+    frame.grid(row=0, column=0, rowspan=101)
+
+    member_id_entry = Entry(frame, borderwidth=3)
+    member_id_entry.bind('<Return>', _member_books_on_loan)
+    member_id_entry.grid(columnspan=2)
+
+    headers = ('ID', 'Genre', 'Title', 'Author', 'Purchase Date', 'Member')
+    on_loan_tree = ttk.Treeview(frame, columns=headers, show='headings')
+    on_loan_tree.grid(row=1, column=0, sticky=NSEW)
+
+    for header in headers:
+        on_loan_tree.column(header, width=40)
+        on_loan_tree.heading(header, text=header)
+
+    sb = Scrollbar(frame, orient=VERTICAL, command=on_loan_tree.yview)
+    on_loan_tree.configure(yscroll=sb.set)
+    sb.grid(row=1, column=1, sticky=NS)
+    ...
+
+
+def _member_books_on_loan(*args):
+    member_id = member_id_entry.get()
+
+    books_on_loan = database.search_books_by_param('member', member_id).values()
+    ...
+
+
 def _return():
     """
     Return given book(s) and notify librarian of status.
     """
+    _hide_status()
     ids = ids_entry.get().split(',')
 
     try:
         ids = [int(book_id) for book_id in ids]
     except ValueError:
-        _show_status('Error', 'A book ID is invalid (not a number)', 'red')
+        _show_status('A book ID is invalid (not a number)', error=True)
         return
 
     error, success = return_book(*ids)
 
     if error is not None:
-        _show_status('Error', error, 'red')
+        _show_status(error, error=True)
 
     if success is not None:
-        _show_status('Success', success, 'green')
+        _show_status(success)
 
 
-def _show_status(title, msg, colour):
+def _show_status(msg, error=False):
     """
-    Make the status frame visible and configure it to show the given message.
+    Configure the relevant status frame to show the given message and display
+    it.
 
-    :param title: the status type
     :param msg: the status message
-    :param colour: status frame background colour
+    :param error: True if the status is an error
     """
-    status_frame.configure(text=title, bg=colour)
-    status_label.configure(text=msg)
-    status_frame.pack(pady=5)
+    if error:
+        label, frame = error_label, error_frame
+    else:
+        label, frame = success_label, success_frame
+
+    label.configure(text=msg)
+    frame.grid()
 
 
 def _hide_status():
     """
-    Hide the status frame.
+    Hide the status frames.
     """
-    status_frame.pack_forget()
+    error_frame.grid_remove()
+    success_frame.grid_remove()
 
 
 def return_book(*book_ids: int) -> tuple[str | None, str | None]:
