@@ -20,6 +20,8 @@ from datetime import datetime
 from tkinter import *
 from tkinter import ttk
 
+from database import date_to_str
+
 import database
 
 ids_entry: Entry = None
@@ -30,8 +32,9 @@ error_label: Label = None
 success_frame: LabelFrame = None
 success_label: Label = None
 
-member_id_entry: Entry = None
-on_loan_tree: ttk.Treeview = None
+member_id: StringVar = None
+tree_frame: Frame = None
+tree: ttk.Treeview = None
 
 
 def get_frame(parent) -> LabelFrame:
@@ -41,8 +44,6 @@ def get_frame(parent) -> LabelFrame:
     :param parent: the parent of the frame
     :return: the fully decorated frame
     """
-    global member_id_entry
-
     global ids_entry
     global error_frame
     global error_label
@@ -96,35 +97,59 @@ def on_show():
     ids_entry.focus_set()
 
 
-def _create_search_frame(root: Frame, bg):
-    global member_id_entry
-    global on_loan_tree
+def _create_search_frame(root, bg):
+    global member_id
+    global tree_frame
+    global tree
 
     frame = Frame(root, bg=bg)
     frame.grid(row=0, column=0, rowspan=101)
 
-    member_id_entry = Entry(frame, borderwidth=3)
+    Label(frame, text="Member ID:", bg=bg, fg='white').pack()
+
+    member_id = StringVar()
+    # TODO: comment about update tree as typing or smthn
+    member_id.trace_add('write', _member_books_on_loan)
+    member_id_entry = Entry(frame, borderwidth=3, textvariable=member_id)
+    # TODO: comment about update tree when enter is pressed
     member_id_entry.bind('<Return>', _member_books_on_loan)
-    member_id_entry.grid(columnspan=2)
+    member_id_entry.pack()
+
+    tree_frame = Frame(frame, bg=bg)
+    #tree_frame.pack()
 
     headers = ('ID', 'Genre', 'Title', 'Author', 'Purchase Date', 'Member')
-    on_loan_tree = ttk.Treeview(frame, columns=headers, show='headings')
-    on_loan_tree.grid(row=1, column=0, sticky=NSEW)
+    tree = ttk.Treeview(tree_frame, columns=headers, show='headings')
+    tree.grid(row=0, column=0, sticky=NSEW)
 
     for header in headers:
-        on_loan_tree.column(header, width=40)
-        on_loan_tree.heading(header, text=header)
+        tree.column(header, width=40)
+        tree.heading(header, text=header)
 
-    sb = Scrollbar(frame, orient=VERTICAL, command=on_loan_tree.yview)
-    on_loan_tree.configure(yscroll=sb.set)
-    sb.grid(row=1, column=1, sticky=NS)
-    ...
+    sb = Scrollbar(tree_frame, orient=VERTICAL, command=tree.yview)
+    tree.configure(yscroll=sb.set)
+    sb.grid(row=0, column=1, sticky=NS)
 
 
 def _member_books_on_loan(*args):
-    member_id = member_id_entry.get()
+    print(f'{args = }')
 
-    books_on_loan = database.search_books_by_param('member', member_id).values()
+    # hide and clear tree
+    tree_frame.pack_forget()
+    tree.delete(*tree.get_children())
+
+    member = member_id.get()
+
+    books_on_loan = database.search_books_by_param('member', member).values()
+    for book in books_on_loan:
+        book = {**vars(book),
+                'purchase_date': date_to_str(book.purchase_date),
+                }
+
+        tree.insert('', index=END, values=tuple(book.values()))
+
+    if books_on_loan:
+        tree_frame.pack()
     ...
 
 

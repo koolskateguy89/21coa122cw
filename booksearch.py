@@ -57,11 +57,13 @@ def get_frame(parent) -> LabelFrame:
 
     attr = StringVar()
     attr.set('title')  # default: search by title
+    # search when attr is modified
+    attr.trace_add('write', _search)
     ttk.Combobox(input_frame, state="readonly", values=database.BOOK_HEADERS,
                  width=13, textvariable=attr).grid(row=0, column=0, padx=5)
 
     query = StringVar()
-    # search whenever text is entered into query_entry
+    # search when query entry text is modified
     query.trace_add('write', _search)
     query_entry = Entry(input_frame, bg=fg, fg=bg, width=30, borderwidth=1,
                         textvariable=query)
@@ -88,7 +90,7 @@ def get_frame(parent) -> LabelFrame:
     Button(frame, text="Search", font='sans 12 bold', command=_search) \
         .pack(pady=5)
 
-    _decorate_results_view()
+    _create_results_view()
 
     return frame
 
@@ -101,7 +103,7 @@ def on_show():
     query_entry.focus_set()
 
 
-def _decorate_results_view():
+def _create_results_view():
     """
     Generate the widgets which will directly display the results, ready to be
     added to the main frame.

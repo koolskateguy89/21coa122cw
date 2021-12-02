@@ -4,6 +4,8 @@ mainloop.
 
 This module graphically defines the menu for the librarian to be able to access
 other program functionalities.
+
+It has been tested and working.
 """
 
 from tkinter import *
