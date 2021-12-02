@@ -51,7 +51,7 @@ def _show_module(module):
 
     :param module: the module to show
     """
-    idx = list(modules.values()).index(module)
+    idx = list(modules.values()).index(module) + 1
     notebook.select(idx)
     _show_frame(notebook)
 
@@ -116,15 +116,15 @@ def main():
     notebook.bind('<<NotebookTabChanged>>', _on_tab_selected)
     setup_frame(notebook)
 
+    # add a tab to facilitate going back to the main menu
+    notebook.add(Frame(notebook, bg=bg), text='Main Menu')
+
     # add a menu button and tab for each module
     for text, module in modules.items():
         _menu_button(text, module).pack(pady=5)
 
         frame = module.get_frame(notebook)
         notebook.add(frame, text=text)
-
-    # add a tab to facilitate going back to the main menu
-    notebook.add(Frame(notebook, bg=bg), text='   Main Menu')
 
     _show_frame(menu)
 

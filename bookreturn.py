@@ -8,6 +8,13 @@ When a book is returned, the most recent transaction log for that book is
 updated with a return date to signify that the book has been returned.
 """
 
+# TODO:
+"""
+Enter user ID,
+display the books they have on loan,
+and pick which books to return
+"""
+
 from datetime import datetime
 from tkinter import *
 
@@ -16,6 +23,8 @@ import database
 ids_entry: Entry = None
 status_frame: LabelFrame = None
 status_label: Label = None
+
+id_entry: Entry = None
 
 
 def get_frame(parent) -> LabelFrame:

@@ -184,7 +184,7 @@ def log_is_on_loan(log: dict) -> bool:
     :param log: the log to check
     :return: whether the log's book is on loan, according only to the log
     """
-    return log.get('return') is None
+    return log['return'] is None
 
 
 # utils

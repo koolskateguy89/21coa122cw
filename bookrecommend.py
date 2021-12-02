@@ -265,10 +265,7 @@ def recommend_genres(member_id: str) -> list[str]:
         book = database.search_book_by_id(log['book_id'])
         genre = book.genre
 
-        if genres.get(genre) is None:
-            genres[genre] = 1
-        else:
-            genres[genre] += 1
+        genres[genre] = genres.get(genre, 0) + 1
 
     sorted_genres = sorted(genres.items(), key=lambda item: item[1],
                            reverse=True)

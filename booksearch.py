@@ -7,6 +7,11 @@ title, author or member. It also allows casing to be ignored and to search for
 books whose attribute contains the given query.
 """
 
+# TODO:
+"""
+Sort of combine this and bookcheckout, when books are listen, allow them to check it out?
+"""
+
 from tkinter import *
 from tkinter import ttk
 from types import SimpleNamespace
@@ -18,6 +23,7 @@ frame: LabelFrame = None
 
 attr: StringVar = None
 query_entry: Entry = None
+query: StringVar = None
 ignore_case: IntVar = None
 contains: IntVar = None
 
@@ -35,6 +41,7 @@ def get_frame(parent) -> LabelFrame:
     global frame
     global attr
     global query_entry
+    global query
     global ignore_case
     global contains
     global results_wrapper
@@ -54,10 +61,14 @@ def get_frame(parent) -> LabelFrame:
     ttk.Combobox(input_frame, state="readonly", values=database.BOOK_HEADERS,
                  width=13, textvariable=attr).grid(row=0, column=0, padx=5)
 
-    query_entry = Entry(input_frame, bg=fg, fg=bg, width=30, borderwidth=1)
+    query = StringVar()
+    # search whenever text is entered into query_entry
+    query.trace('w', _search)
+    query_entry = Entry(input_frame, bg=fg, fg=bg, width=30, borderwidth=1,
+                        textvariable=query)
     query_entry.focus_set()
     # search when enter is pressed
-    query_entry.bind('<Return>', lambda event: _search())
+    query_entry.bind('<Return>', _search)
 
     query_entry.grid(row=0, column=1, padx=5)
 
@@ -113,14 +124,17 @@ def _decorate_results_view():
     sb.grid(row=0, column=1, sticky=NS)
 
 
-def _search():
+def _search(*args):
     """
     Perform a search then display the results on screen.
+
+    :param args: unused varargs to allow this to be used as a callback for
+        anything
     """
     _clear_results()
 
     results: list[SimpleNamespace] = search_by_param(attr.get(),
-                                                     query_entry.get(),
+                                                     query.get(),
                                                      ignore_case.get(),
                                                      contains.get())
 
