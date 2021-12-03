@@ -1,7 +1,7 @@
 """"
 This modules contains functions to be able to recommend books for a member,
 this is done by generating popularity scores for a book, which is determined by
-a combination of how much the user likes the genre and how many times the book
+a combination of how much the member likes the genre and how many times the book
 has been taken out by members.
 
 
@@ -18,6 +18,8 @@ Score system:
 
 Book recommendations are displayed in a bar chart which shows the title and the
 popularity of the title.
+
+It has been tested and is working.
 """
 
 from tkinter import *
@@ -43,6 +45,7 @@ canvas: FigureCanvasTkAgg = None
 
 error_frame: Frame = None
 error_label: Label = None
+# TODO: explore having horizontal bars
 
 
 def get_frame(parent) -> LabelFrame:

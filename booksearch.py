@@ -17,7 +17,6 @@ from tkinter import ttk
 from types import SimpleNamespace
 
 import database
-from database import date_to_str
 
 frame: LabelFrame = None
 
@@ -68,9 +67,6 @@ def get_frame(parent) -> LabelFrame:
     query_entry = Entry(input_frame, bg=fg, fg=bg, width=30, borderwidth=1,
                         textvariable=query)
     query_entry.focus_set()
-    # search when enter is pressed
-    query_entry.bind('<Return>', _search)
-
     query_entry.grid(row=0, column=1, padx=5)
 
     ignore_case = IntVar()
@@ -121,7 +117,6 @@ def _create_results_view():
     for header in headers:
         tree.column(header, width=90)
         tree.heading(header, text=header)
-
     tree.column('ID', anchor=CENTER, width=30)
 
     sb = Scrollbar(results_wrapper, orient=VERTICAL, command=tree.yview)
@@ -129,22 +124,21 @@ def _create_results_view():
     sb.grid(row=0, column=1, sticky=NS)
 
 
-def _search(*args):
+def _search(*_):
     """
     Perform a search then display the results on screen.
 
-    :param args: unused varargs to allow this to be used as a callback for
-        anything
+    :param _: unused varargs to allow this to be used as any callback
     """
     hide_results()
     _clear_results()
 
-    _query = query.get().strip()
-    if not _query:
+    query_ = query.get().strip()
+    if not query_:
         return
 
     results: list[SimpleNamespace] = search_by_param(attr.get(),
-                                                     _query,
+                                                     query_,
                                                      ignore_case.get(),
                                                      contains.get())
 
@@ -153,8 +147,6 @@ def _search(*args):
 
         # mutate some values to give librarian a better experience
         book = {**vars(book),
-                # display appropriate string representation of date
-                'purchase_date': date_to_str(book.purchase_date),
                 # if book is available, don't show anyone as member
                 'member': member if (member := book.member) != '0' else '_'
                 }
@@ -209,10 +201,7 @@ def search_by_param(attr, query, ignore_case=False, contains=False) -> \
     :return: list of books with the given title
     """
 
-    if attr == 'purchase_date':
-        return search_by_date_str(query, contains)
-
-    # convert book attribute to str as 'id' is stored as int
+    # convert book attribute to str because 'id' is stored as int
     get_value = lambda book: str(getattr(book, attr)) if not ignore_case else \
         str(getattr(book, attr)).casefold()
     is_valid = lambda value, query: value == query if not contains else \
@@ -223,22 +212,6 @@ def search_by_param(attr, query, ignore_case=False, contains=False) -> \
 
     return [book for book in database.books.values()
             if is_valid(get_value(book), query)]
-
-
-def search_by_date_str(date: str, contains=False) -> list[SimpleNamespace]:
-    """
-    Return the books whose purchase date (in DD/MM/YYYY format) match the given
-    date.
-
-    :param date: date to search for (not necessarily a full date)
-    :param contains: whether to check if book date contains query or not
-    :return:
-    """
-    is_valid = lambda value, query: value == query if not contains else \
-        query in value
-
-    return [book for book in database.books.values()
-            if is_valid(date_to_str(book.purchase_date), date)]
 
 
 def search_by_title(title, ignore_case=False, contains=False) -> \
@@ -302,7 +275,7 @@ def main():
         "search failed for 'Avengers'"
 
     assert (l := search_by_param('id', 10))[0].genre == 'Crime' \
-           and len(l) == 1, "search by id failed for id 1"
+           and len(l) == 1, "search by ID failed for ID 1"
 
     print('booksearch.py has passed all tests!')
 

@@ -7,7 +7,7 @@ Books are represented by SimpleNamespaces, mimicking a class:
     'genre': str
     'title': str
     'author': str
-    'purchase_date': datetime.datetime
+    'purchase_date': str
     'member': str
 
 The book database is represented as a dict[int, SimpleNamespace]
@@ -38,7 +38,8 @@ NOW = datetime.now()
 
 def _read_database() -> dict[int, SimpleNamespace]:
     """
-    Read the database file and parse it into a dictionary.
+    Read the database file and parse it into a dictionary, with key the book id
+    and value the SimpleNamespace object representing the book.
 
     :return: a dictionary representing the database
     """
@@ -51,8 +52,6 @@ def _read_database() -> dict[int, SimpleNamespace]:
 
         for book in reader:
             book['id'] = int(book['id'])
-            book['purchase_date'] = str_to_date(book['purchase_date'])
-
             result[book['id']] = SimpleNamespace(**book)
 
     return result
@@ -60,16 +59,13 @@ def _read_database() -> dict[int, SimpleNamespace]:
 
 def update_database():
     """
-    Update the database file.
+    Update the book database file.
     """
     with open('database.txt', 'w', newline='') as db:
         writer = csv.DictWriter(db, fieldnames=BOOK_HEADERS)
         writer.writeheader()
         for book in books.values():
-            book_ = vars(book)
-            # write the purchase date in appropriate format to file
-            book_['purchase_date'] = date_to_str(book.purchase_date)
-            writer.writerow(book_)
+            writer.writerow(vars(book))
 
 
 # Searching for books
@@ -88,10 +84,10 @@ def search_books_by_param(param: str, value) -> dict[int, SimpleNamespace]:
 
 def search_book_by_id(book_id: int) -> SimpleNamespace:
     """
-    Return the book with the given id.
+    Return the book with the given ID.
 
-    :param book_id: the book id to search for
-    :return: the book with the given id
+    :param book_id: the book ID to search for
+    :return: the book with the given ID
     """
     return books.get(book_id)
 
@@ -166,7 +162,6 @@ def new_log(book_id: int, member_id: str) -> dict:
     :param member_id: the ID of the member the log is for
     :return: the log
     """
-    from datetime import datetime
     return {
         'book_id': book_id,
         'checkout': datetime.now(),
@@ -287,4 +282,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    LOG_HEADERS = 2
