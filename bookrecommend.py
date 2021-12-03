@@ -31,6 +31,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, \
     NavigationToolbar2Tk
 from matplotlib.figure import Figure
 
+import random
+
 import database
 
 plt.style.use('Solarize_Light2')
@@ -134,8 +136,14 @@ def _recommend():
         _show_error(f"Invalid member ID: '{member_id}'")
         return
 
-    # TODO: if member hasn't read any books or smthn, recommend the 3 most popular Action/... books
     sorted_genres: list[str] = recommend_genres(member_id)
+
+    # TODO: if member hasn't read any books or smthn, recommend the 3 most popular Action/... books
+    if not sorted_genres:
+        import random
+        random_genre = random.choice(('Action', 'Crime', 'Romance'))
+        sorted_genres = [random_genre]
+        ...
 
     genre_popularities: dict[str, int] = {genre: (idx + 1) * 6 for idx, genre in
                                           enumerate(reversed(sorted_genres))}
@@ -203,7 +211,7 @@ def _reset_figure():
     ax.tick_params(labelbottom=False)  # don't show x-axis values
 
 
-bar_colours = [
+BAR_COLOURS = [
     'red',
     'darkorange',
     'yellow',
@@ -217,15 +225,22 @@ bar_colours = [
 ]
 
 
-def _add_legend(titles: list[str]):
+def _add_legend(titles: list[str]) -> list[str]:
     """
-    Add legend to axes as titles are too long to show on the x-axis.
+    Add legend to axes as titles are too long to show on the x-axis, with bar
+    colours in a random order.
 
     :param titles: the recommended titles
+    :return: the shuffled bar colours
     """
+    shuffled_colours = BAR_COLOURS.copy()
+    random.shuffle(shuffled_colours)
+
     patches = [mpatches.Patch(color=col, label=title)
-               for col, title in zip(bar_colours, titles)]
+               for col, title in zip(shuffled_colours, titles)]
     ax.legend(handles=patches, loc='best')
+
+    return shuffled_colours
 
 
 def _plot(titles: list[str], popularities: list[int]):
@@ -237,7 +252,7 @@ def _plot(titles: list[str], popularities: list[int]):
     """
     _reset_figure()
 
-    _add_legend(titles)
+    bar_colours_ = _add_legend(titles)
 
     x_axis = range(len(titles))
 
@@ -245,7 +260,7 @@ def _plot(titles: list[str], popularities: list[int]):
     bars = ax.bar(x_axis, popularities, width=.7)
 
     # set bar colour according to legend to show which title the bar represents
-    for bar, col in zip(bars, bar_colours):
+    for bar, col in zip(bars, bar_colours_):
         bar.set_color(col)
 
     canvas.draw()
