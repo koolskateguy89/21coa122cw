@@ -22,7 +22,8 @@ ids_entry: Entry = None
 
 error_frame: LabelFrame = None
 error_label: Label = None
-
+warning_frame: LabelFrame = None
+warning_label: Label = None
 success_frame: LabelFrame = None
 success_label: Label = None
 
@@ -42,6 +43,8 @@ def get_frame(parent) -> LabelFrame:
     global ids_entry
     global error_frame
     global error_label
+    global warning_frame
+    global warning_label
     global success_frame
     global success_label
 
@@ -66,21 +69,29 @@ def get_frame(parent) -> LabelFrame:
 
     Button(return_frame, text="Return", command=_return).grid(pady=10)
 
-    error_frame = LabelFrame(return_frame, text="Error", padx=1, pady=5, bg='red',
-                             fg=bg)
-    # configure the error frame's grid options to be before the success frame
+    error_frame = LabelFrame(return_frame, text="Error", padx=1, pady=5,
+                             bg='red', fg=bg)
+    # configure the error frame's grid options to be before the warning frame
     error_frame.grid(row=100, pady=5)
-    error_frame.grid_remove()
     error_label = Label(error_frame, bg=bg, fg=fg)
     error_label.pack()
 
-    success_frame = LabelFrame(return_frame, text="Error", padx=1, pady=5, bg='green',
-                               fg=bg)
-    # configure the success frame's grid options to be after the error frame
-    success_frame.grid(row=101, pady=5)
-    success_frame.grid_remove()
+    warning_frame = LabelFrame(return_frame, text="Warning", padx=1, pady=5,
+                               bg='yellow', fg=bg)
+    # configure the warning frame's grid options to be before the success frame
+    warning_frame.grid(row=101, pady=5)
+    warning_label = Label(warning_frame, bg=bg, fg=fg)
+    warning_label.pack()
+
+    success_frame = LabelFrame(return_frame, text="Error", padx=1, pady=5,
+                               bg='green', fg=bg)
+    # configure the success frame's grid options to be after the warning frame
+    success_frame.grid(row=102, pady=5)
     success_label = Label(success_frame, bg=bg, fg=fg)
     success_label.pack()
+
+    # hide status frames
+    _hide_status()
 
     return frame
 
@@ -114,10 +125,13 @@ def _return0(*ids: int):
 
     :param ids: the ID's of the books to return
     """
-    error, success = return_book(*ids)
+    error, warning, success = return_book(*ids)
 
     if error is not None:
         _show_status(error, error=True)
+
+    if warning is not None:
+        _show_warning(warning)
 
     if success is not None:
         _show_status(success)
@@ -233,6 +247,16 @@ def _return_tree():
     tree_button.grid_remove()
 
 
+def _show_warning(msg):
+    """
+    Make the warning frame visible with the given warning message.
+
+    :param msg: the warning message
+    """
+    warning_label.configure(text=msg)
+    warning_frame.grid()
+
+
 def _show_status(msg, error=False):
     """
     Configure the relevant status frame to show the given message and display
@@ -255,26 +279,31 @@ def _hide_status():
     Hide the status frames.
     """
     error_frame.grid_remove()
+    warning_frame.grid_remove()
     success_frame.grid_remove()
 
 
-def return_book(*book_ids: int) -> tuple[str | None, str | None]:
+def return_book(*book_ids: int) -> tuple[str | None, str | None, str | None]:
     """
     Try to return given books, update the database and logfile if successful.
 
     :param book_ids: the id(s) of the book(s) to return
-    :return: (error message, success message)
+    :return: (error message, warning message, success message)
     """
-    returned = []
+
+    returned = list[str]()
+    overdue = list[str]()
 
     for book_id in book_ids:
         book = database.search_book_by_id(book_id)
 
         if book is None:
-            return f"No book with ID: {book_id}", _success(returned)
+            return (f"No book with ID: {book_id}", _warning(overdue),
+                    _success(returned))
 
         if book.member == '0':
-            return f"Book {book_id} already returned", _success(returned)
+            return (f"Book {book_id} already returned", _warning(overdue),
+                    _success(returned))
 
         book.member = '0'
 
@@ -290,10 +319,12 @@ def return_book(*book_ids: int) -> tuple[str | None, str | None]:
         # update the log, indicating the book has been returned
         if log is not None:
             log['return'] = datetime.now()
+            if database.is_more_than_60_days_ago(log['checkout']):
+                overdue.append(str(book_id))
 
         returned.append(str(book_id))
 
-    return None, _success(returned)
+    return None, _warning(overdue), _success(returned)
 
 
 def _success(returned: list[str]) -> str | None:
@@ -301,7 +332,7 @@ def _success(returned: list[str]) -> str | None:
     Update database files if books have been returned.
 
     :param returned: the ids of returned books
-    :return: 'success message' of return_book
+    :return: 'success message' of def return_book
     """
     if not returned:
         return None
@@ -310,6 +341,18 @@ def _success(returned: list[str]) -> str | None:
     database.update_database()
 
     return f"Book(s) {{{','.join(returned)}}} returned"
+
+
+def _warning(overdue: list[str]) -> str | None:
+    """
+    Return the warning message for def return_book
+
+    :param overdue: the IDs of books that were returned after 60 days
+    :return: 'warning message' of def return_book
+    """
+    if not overdue:
+        return None
+    return f"Book(s) {{{','.join(overdue)}}} returned after 60 days"
 
 
 # tests
@@ -321,7 +364,7 @@ def main():
     database.update_database = lambda: None
     database.update_logfile = lambda: None
 
-    assert return_book() == (None, None), 'return_book failed for no input'
+    assert return_book() == (None, None, None), 'return_book failed for no input'
 
     assert _success([]) is None, '_success failed for empty list'
 
