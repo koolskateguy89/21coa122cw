@@ -233,14 +233,25 @@ def _add_legend(titles: list[str]) -> list[str]:
     :param titles: the recommended titles
     :return: the shuffled bar colours
     """
-    shuffled_colours = BAR_COLOURS.copy()
-    random.shuffle(shuffled_colours)
+    bar_colours = [
+        'red',
+        'darkorange',
+        'yellow',
+        'green',
+        'cyan',
+        'navy',
+        'indigo',
+        'pink',
+        'magenta',
+        'purple',
+    ]
+    random.shuffle(bar_colours)
 
     patches = [mpatches.Patch(color=col, label=title)
-               for col, title in zip(shuffled_colours, titles)]
+               for col, title in zip(bar_colours, titles)]
     ax.legend(handles=patches, loc='best')
 
-    return shuffled_colours
+    return bar_colours
 
 
 def _plot(titles: list[str], popularities: list[int]):
@@ -252,7 +263,7 @@ def _plot(titles: list[str], popularities: list[int]):
     """
     _reset_figure()
 
-    bar_colours_ = _add_legend(titles)
+    bar_colours = _add_legend(titles)
 
     x_axis = range(len(titles))
 
@@ -260,7 +271,7 @@ def _plot(titles: list[str], popularities: list[int]):
     bars = ax.bar(x_axis, popularities, width=.7)
 
     # set bar colour according to legend to show which title the bar represents
-    for bar, col in zip(bars, bar_colours_):
+    for bar, col in zip(bars, bar_colours):
         bar.set_color(col)
 
     canvas.draw()
