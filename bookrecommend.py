@@ -138,12 +138,11 @@ def _recommend():
 
     sorted_genres: list[str] = recommend_genres(member_id)
 
-    # TODO: if member hasn't read any books or smthn, recommend the 3 most popular Action/... books
     if not sorted_genres:
-        import random
-        random_genre = random.choice(('Action', 'Crime', 'Romance'))
+        genres = ('Action', 'Crime', 'Fantasy', 'Mystery', 'Romance', 'Sci-Fi',
+                  'Tragedy', 'Drama', 'Adventure', 'Horror')
+        random_genre = random.choice(genres)
         sorted_genres = [random_genre]
-        ...
 
     genre_popularities: dict[str, int] = {genre: (idx + 1) * 6 for idx, genre in
                                           enumerate(reversed(sorted_genres))}
