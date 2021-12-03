@@ -110,7 +110,6 @@ def _checkout():
 
     error, warning, success = checkout_book(member_id, *ids)
 
-    # FIXME: error and success may not both show if some error & some success
     if error is not None:
         _show_status(error, error=True)
 
