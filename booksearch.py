@@ -7,11 +7,6 @@ title, author or member. It also allows casing to be ignored and to search for
 books whose attribute contains the given query.
 """
 
-# TODO:
-"""
-Sort of combine this and bookcheckout, when books are listen, allow them to check it out?
-"""
-
 from tkinter import *
 from tkinter import ttk
 from types import SimpleNamespace
