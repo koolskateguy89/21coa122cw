@@ -19,8 +19,12 @@ ids_entry: Entry = None
 
 warning_frame: LabelFrame = None
 warning_label: Label = None
-status_frame: LabelFrame = None
-status_label: Label = None
+
+error_frame: LabelFrame = None
+error_label: Label = None
+
+success_frame: LabelFrame = None
+success_label: Label = None
 
 
 def get_frame(parent) -> LabelFrame:
@@ -35,8 +39,10 @@ def get_frame(parent) -> LabelFrame:
 
     global warning_frame
     global warning_label
-    global status_frame
-    global status_label
+    global error_frame
+    global error_label
+    global success_frame
+    global success_label
 
     bg, fg = 'black', '#f8f8ff'
 
@@ -66,9 +72,15 @@ def get_frame(parent) -> LabelFrame:
                           justify=CENTER)
     warning_label.pack()
 
-    status_frame = LabelFrame(frame, padx=1, fg=fg)
-    status_label = Label(status_frame, bg=bg, fg=fg)
-    status_label.pack()
+    error_frame = LabelFrame(frame, text="Error", padx=1, bg='red')
+    error_label = Label(error_frame, bg=bg, fg=fg, wraplength=450,
+                        justify=CENTER)
+    error_label.pack()
+
+    success_frame = LabelFrame(frame, text="Success", padx=1, bg='green')
+    success_label = Label(success_frame, bg=bg, fg=fg, wraplength=450,
+                          justify=CENTER)
+    success_label.pack()
 
     return frame
 
@@ -93,20 +105,20 @@ def _checkout():
     try:
         ids = [int(book_id) for book_id in ids]
     except ValueError:
-        _show_status('Error', 'A book ID is invalid (not a number)', 'red')
+        _show_status('A book ID is invalid (not a number)', error=True)
         return
 
     error, warning, success = checkout_book(member_id, *ids)
 
-    # FIXME: error and success may not both show
+    # FIXME: error and success may not both show if some error & some success
     if error is not None:
-        _show_status('Error', error, 'red')
+        _show_status(error, error=True)
 
     if warning is not None:
         _show_warning(warning)
 
     if success is not None:
-        _show_status('Success', success, 'green')
+        _show_status(success)
 
 
 def _show_warning(msg):
@@ -119,26 +131,30 @@ def _show_warning(msg):
     warning_frame.pack(pady=5)
 
 
-def _show_status(title, msg, colour):
+def _show_status(msg, error=False):
     """
-    Make the status frame visible and configure it to show the given message
-    with the given title and given background colour to denote the status type.
+    Configure the relevant status frame to show the given message and display
+    it.
 
-    :param title: the status type
     :param msg: the status message
-    :param colour: status frame background colour
+    :param error: whether the status is an error or not
     """
-    status_frame.configure(text=title, bg=colour)
-    status_label.configure(text=msg)
-    status_frame.pack(pady=5)
+    if error:
+        label, frame = error_label, error_frame
+    else:
+        label, frame = success_label, success_frame
+
+    label.configure(text=msg)
+    frame.pack(pady=5)
 
 
 def _hide_status():
     """
-    Hide the warning and status frames.
+    Hide the status frames.
     """
     warning_frame.pack_forget()
-    status_frame.pack_forget()
+    error_frame.pack_forget()
+    success_frame.pack_forget()
 
 
 def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
@@ -147,8 +163,8 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
     """
     Withdraw given book(s) to a given member, update the database and logfile.
 
-    :param member_id: the id of the member who wants to withdraw book(s)
-    :param book_ids: the id(s) of the book(s) the member wants to checkout
+    :param member_id: the ID of the member who wants to withdraw book(s)
+    :param book_ids: the ID(s) of the book(s) the member wants to checkout
     :return: (error message, warning message, success message)
     """
     withdrawn = []
