@@ -47,9 +47,6 @@ def _read_database() -> dict[int, SimpleNamespace]:
 
     with open('database.txt', newline='') as db:
         reader = csv.DictReader(db, fieldnames=BOOK_HEADERS)
-        # skip header
-        next(reader)
-
         for book in reader:
             book['id'] = int(book['id'])
             result[book['id']] = SimpleNamespace(**book)
@@ -63,7 +60,6 @@ def update_database():
     """
     with open('database.txt', 'w', newline='') as db:
         writer = csv.DictWriter(db, fieldnames=BOOK_HEADERS)
-        writer.writeheader()
         for book in books.values():
             writer.writerow(vars(book))
 
@@ -104,9 +100,6 @@ def _read_logfile() -> list[dict]:
 
     with open('logfile.txt', newline='') as logfile:
         reader = csv.DictReader(logfile, fieldnames=LOG_HEADERS)
-        # skip header
-        next(reader)
-
         # update types
         for log in reader:
             log['book_id'] = int(log['book_id'])
@@ -124,8 +117,6 @@ def update_logfile():
     """
     with open('logfile.txt', 'w', newline='') as logfile:
         writer = csv.DictWriter(logfile, fieldnames=LOG_HEADERS)
-        writer.writeheader()
-
         for log in logs:
             log = log.copy()
             log['checkout'] = date_to_str(log['checkout'])
