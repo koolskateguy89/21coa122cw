@@ -41,10 +41,10 @@ def _on_tab_selected(event):
     tab_text = event.widget.tab(selected_tab, 'text')
     module = modules.get(tab_text)
 
-    if module is not None:
-        module.on_show()
-    else:
+    if module is None:
         _show_frame(menu)
+    else:
+        module.on_show()
 
 
 def _show_module(module):
