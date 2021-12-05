@@ -26,7 +26,13 @@ import random
 from tkinter import *
 from types import SimpleNamespace
 
-from matplotlib import pyplot as plt, patches as mpatches
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import matplotlib.cm as mplcm
+import matplotlib.colors as colors
+import matplotlib.patheffects as path_effects
+
+from cycler import cycler
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, \
     NavigationToolbar2Tk
@@ -94,7 +100,7 @@ def on_show():
     """
     Hide results and set focus on the book ID entry when this frame is shown.
     """
-    hide_results()
+    # hide_results()
     id_entry.focus_set()
 
 
@@ -117,8 +123,8 @@ def _generate_results_view():
     toolbar = NavigationToolbar2Tk(canvas, results_frame, pack_toolbar=False)
     toolbar.update()
 
-    toolbar.pack(side=BOTTOM)
-    canvas.get_tk_widget().pack(side=TOP, fill=X)
+    toolbar.pack(side=BOTTOM, pady=10)
+    canvas.get_tk_widget().pack(side=TOP, fill=X, ipady=10)
 
 
 def _recommend():
@@ -199,37 +205,60 @@ def _reset_figure():
     """
     Reset figure by clearing axes and re-setting axes settings.
     """
-    # TODO: explore having horizontal bars
     ax.clear()
     # axes.clear also removes settings so we have to re-set them
-    ax.set_title('Recommendations')
-    ax.set_xlabel('Book')
-    ax.set_ylabel('Popularity')
-    ax.tick_params(labelbottom=False)  # don't show x-axis values
+    ax.set_title('Recommended Books')
+    ax.set_xlabel('Popularity')
+    ax.set_ylabel('Book')
+    ax.tick_params(labelleft=False)  # don't show y-axis values
 
 
-BAR_COLOURS = [
-    'red',
-    'darkorange',
-    'yellow',
-    'green',
-    'cyan',
-    'navy',
-    'indigo',
-    'pink',
-    'magenta',
-    'purple',
-]
-
-
-def _add_legend(titles: list[str]) -> list[str]:
+cmIndx = 0
+def _get_random_bar_colors(num_colors: int = 10) -> list[tuple[int]]:
     """
-    Add legend to axes as titles are too long to show on the x-axis, with bar
-    colours in a random order.
 
-    :param titles: the recommended titles
-    :return: the shuffled bar colours
+    :param num_colors:
+    :return: a list of rgba colors (4-tuples)
     """
+    global cmIndx
+    # matplotlib qualitative colormaps
+    # https://matplotlib.org/stable/tutorials/colors/colormaps.html#qualitative
+    cms = {
+        'Paired': 12,  # brown at the end :/
+        'Accent': 8,
+        'Dark2': 8,
+        'Set1': 9,
+        'Set2': 8,
+        'tab10': 10,
+        'tab20b': 20,
+    }
+
+    # filter colormaps as some don't have enough colors for each bar to be a
+    # different color
+    cms = [cm for cm, n_colors in cms.items() if n_colors >= num_colors]
+
+    #cms = list(cms.keys())
+
+    # TODO: basically try to filter colormaps to not include blacks/whites (mainly blacks) because background is black
+    #cms = plt.colormaps()
+    #cm = random.choice(cms)
+    cm = cms[cmIndx]
+    print(cmIndx, cm)
+    cmIndx += 1
+    if cmIndx >= len(cms):
+        print('All')
+        cmIndx = 0
+    #cm = plt.get_cmap('gist_rainbow')
+
+    # https://stackoverflow.com/a/8391452/17381629
+    cNorm = colors.Normalize(vmin=0, vmax=num_colors - 1)
+    scalarMap = mplcm.ScalarMappable(norm=cNorm, cmap=cm)
+
+    return [scalarMap.to_rgba(i) for i in range(num_colors)]
+
+
+# TODO: decide to remove/use
+def _randomise_colours() -> list[str]:
     bar_colours = [
         'red',
         'darkorange',
@@ -243,11 +272,6 @@ def _add_legend(titles: list[str]) -> list[str]:
         'purple',
     ]
     random.shuffle(bar_colours)
-
-    patches = [mpatches.Patch(color=col, label=title)
-               for col, title in zip(bar_colours, titles)]
-    ax.legend(handles=patches, loc='best')
-
     return bar_colours
 
 
@@ -260,16 +284,42 @@ def _plot(titles: list[str], popularities: list[int]):
     """
     _reset_figure()
 
-    bar_colours = _add_legend(titles)
+    #bar_colours = _randomise_colours()
+    bar_colours = _get_random_bar_colors(len(titles))
+    # random.boolean for reverse(bar_colours)
 
-    x_axis = range(len(titles))
+    # len(titles) -> 0 as we want to display the most popular titles at the top
+    y_axis = range(len(titles), 0, -1)
 
-    # make bar chart
-    bars = ax.bar(x_axis, popularities, width=.7)
+    # show y-axis ticks on every book
+    ax.set_yticks(y_axis)
+
+    # make horizontal bar chart
+    #bars = ax.barh(y_axis, popularities, height=.7)
+    bars = ax.barh(y_axis, popularities, height=.7, color=bar_colours)
+    min_pop = min(popularities)
 
     # set bar colour according to legend to show which title the bar represents
-    for bar, col in zip(bars, bar_colours):
-        bar.set_color(col)
+    for bar, title, col in zip(bars, titles, bar_colours):
+        y = bar.get_y()
+        height = bar.get_height()
+
+        #print(title, y + height * .25)
+
+        # TODO: bar.text() book title
+
+        # put title into the middle of the bar
+        # ax.text(30, y + height * .25, title, color='black', fontweight='bold')
+        text = ax.text(min(50.0, min_pop/4), y + height/2, title, color='white',
+                       fontweight='bold', va='center')
+        # add a black outline to text so it is visible on all backgrounds
+        text.set_path_effects([
+            path_effects.Stroke(linewidth=2, foreground='black'),
+            path_effects.Normal(),
+        ])
+
+        # TODO: remove bar_colours from zip?
+        #bar.set_color(col)
 
     canvas.draw()
 
