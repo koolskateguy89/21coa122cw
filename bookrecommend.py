@@ -22,6 +22,7 @@ popularity of the title.
 It has been tested and is working.
 """
 
+import random
 from tkinter import *
 from types import SimpleNamespace
 
@@ -30,8 +31,6 @@ from matplotlib.axes import Axes
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, \
     NavigationToolbar2Tk
 from matplotlib.figure import Figure
-
-import random
 
 import database
 
@@ -47,7 +46,6 @@ canvas: FigureCanvasTkAgg = None
 
 error_frame: Frame = None
 error_label: Label = None
-# TODO: explore having horizontal bars
 
 
 def get_frame(parent) -> LabelFrame:
@@ -141,8 +139,7 @@ def _recommend():
     if not sorted_genres:
         genres = ('Action', 'Crime', 'Fantasy', 'Mystery', 'Romance', 'Sci-Fi',
                   'Tragedy', 'Drama', 'Adventure', 'Horror')
-        random_genre = random.choice(genres)
-        sorted_genres = [random_genre]
+        sorted_genres = [random.choice(genres)]
 
     genre_popularities: dict[str, int] = {genre: (idx + 1) * 6 for idx, genre in
                                           enumerate(reversed(sorted_genres))}
@@ -202,6 +199,7 @@ def _reset_figure():
     """
     Reset figure by clearing axes and re-setting axes settings.
     """
+    # TODO: explore having horizontal bars
     ax.clear()
     # axes.clear also removes settings so we have to re-set them
     ax.set_title('Recommendations')
