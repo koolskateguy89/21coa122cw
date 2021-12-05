@@ -26,13 +26,10 @@ import random
 from tkinter import *
 from types import SimpleNamespace
 
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import matplotlib.cm as mplcm
 import matplotlib.colors as colors
 import matplotlib.patheffects as path_effects
-
-from cycler import cycler
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, \
     NavigationToolbar2Tk
@@ -98,9 +95,8 @@ def get_frame(parent) -> LabelFrame:
 
 def on_show():
     """
-    Hide results and set focus on the book ID entry when this frame is shown.
+    Set focus on the book ID entry when this frame is shown.
     """
-    # hide_results()
     id_entry.focus_set()
 
 
@@ -119,7 +115,6 @@ def _generate_results_view():
     canvas = FigureCanvasTkAgg(fig, master=results_frame)
     canvas.draw()
 
-    # pack_toolbar=False will make it easier to use a layout manager later on.
     toolbar = NavigationToolbar2Tk(canvas, results_frame, pack_toolbar=False)
     toolbar.update()
 
@@ -159,7 +154,7 @@ def _recommend():
         for title, title_pop in titles:
             titles_with_scores[title] = title_pop * genre_score
 
-    # sort titles by score (popularity)
+    # sort titles by score (popularity) in descending order
     sorted_titles: list[tuple[str, int]] = sorted(titles_with_scores.items(),
                                                   key=lambda item: item[1],
                                                   reverse=True)
@@ -207,72 +202,70 @@ def _reset_figure():
     """
     ax.clear()
     # axes.clear also removes settings so we have to re-set them
+
     ax.set_title('Recommended Books')
     ax.set_xlabel('Popularity')
     ax.set_ylabel('Book')
     ax.tick_params(labelleft=False)  # don't show y-axis values
 
 
-cmIndx = 0
-def _get_random_bar_colors(num_colors: int = 10) -> list[tuple[int]]:
-    """
+# matplotlib colormaps (21)
+# https://matplotlib.org/stable/gallery/color/colormap_reference.html
+# https://matplotlib.org/stable/tutorials/colors/colormaps.html#classes-of-colormaps
+INF = float('inf')
+COLOR_MAPS = {
+    # Perceptually Uniform Sequential
+    'viridis': INF,
+    'plasma': INF,
+    # Sequential (2)
+    'spring': INF,
+    'summer': INF,
+    'autumn': INF,
+    # Qualitative
+    'Accent': 8,
+    'Dark2': 8,
+    'Set1': 9,
+    'Set2': 8,
+    'tab10': 10,
+    'tab20b': 20,
+    # Diverging
+    'RdBu': INF,
+    'RdYlBu': INF,
+    'RdYlGn': INF,
+    'Spectral': INF,
+    'coolwarm': INF,
+    'bwr': INF,
+    # Miscellaneous
+    'prism': 6,
+    'gist_rainbow': INF,
+    'rainbow': INF,
+    'gist_ncar': INF,
+}
 
-    :param num_colors:
+
+def _get_random_bar_colors(length: int = 10) -> list[tuple[int]]:
+    """
+    Return a normalized list of colors from a random colormap, of given length.
+
+    :param length: how many colors to generate
     :return: a list of rgba colors (4-tuples)
     """
-    global cmIndx
-    # matplotlib qualitative colormaps
-    # https://matplotlib.org/stable/tutorials/colors/colormaps.html#qualitative
-    cms = {
-        'Paired': 12,  # brown at the end :/
-        'Accent': 8,
-        'Dark2': 8,
-        'Set1': 9,
-        'Set2': 8,
-        'tab10': 10,
-        'tab20b': 20,
-    }
+    # filter COLOR_MAPS as some don't have enough different colors for each bar
+    # to be a different color
+    cmaps = [cmap for cmap, cols in COLOR_MAPS.items() if cols >= length]
+    cmap = random.choice(cmaps)
 
-    # filter colormaps as some don't have enough colors for each bar to be a
-    # different color
-    cms = [cm for cm, n_colors in cms.items() if n_colors >= num_colors]
+    # randomly choose (50% chance) to reverse the colormap
+    if random.random() < 0.5:
+        cmap += '_r'
 
-    #cms = list(cms.keys())
-
-    # TODO: basically try to filter colormaps to not include blacks/whites (mainly blacks) because background is black
-    #cms = plt.colormaps()
-    #cm = random.choice(cms)
-    cm = cms[cmIndx]
-    print(cmIndx, cm)
-    cmIndx += 1
-    if cmIndx >= len(cms):
-        print('All')
-        cmIndx = 0
-    #cm = plt.get_cmap('gist_rainbow')
-
+    # be able to generate n=length linearly normalised values between [0.0, 1.0]
     # https://stackoverflow.com/a/8391452/17381629
-    cNorm = colors.Normalize(vmin=0, vmax=num_colors - 1)
-    scalarMap = mplcm.ScalarMappable(norm=cNorm, cmap=cm)
+    norm = colors.Normalize(vmin=0, vmax=length - 1)
+    # sample colormap at (length-1) normalised intervals
+    scalar_map = mplcm.ScalarMappable(norm=norm, cmap=cmap)
 
-    return [scalarMap.to_rgba(i) for i in range(num_colors)]
-
-
-# TODO: decide to remove/use
-def _randomise_colours() -> list[str]:
-    bar_colours = [
-        'red',
-        'darkorange',
-        'yellow',
-        'green',
-        'cyan',
-        'navy',
-        'indigo',
-        'pink',
-        'magenta',
-        'purple',
-    ]
-    random.shuffle(bar_colours)
-    return bar_colours
+    return [scalar_map.to_rgba(i) for i in range(length)]
 
 
 def _plot(titles: list[str], popularities: list[int]):
@@ -284,42 +277,32 @@ def _plot(titles: list[str], popularities: list[int]):
     """
     _reset_figure()
 
-    #bar_colours = _randomise_colours()
     bar_colours = _get_random_bar_colors(len(titles))
-    # random.boolean for reverse(bar_colours)
 
     # len(titles) -> 0 as we want to display the most popular titles at the top
     y_axis = range(len(titles), 0, -1)
-
-    # show y-axis ticks on every book
+    # show y-axis ticks on every bar
     ax.set_yticks(y_axis)
 
     # make horizontal bar chart
-    #bars = ax.barh(y_axis, popularities, height=.7)
     bars = ax.barh(y_axis, popularities, height=.7, color=bar_colours)
-    min_pop = min(popularities)
 
-    # set bar colour according to legend to show which title the bar represents
-    for bar, title, col in zip(bars, titles, bar_colours):
+    min_pop = min(popularities)
+    # add title text to bars to show which title the bar represents
+    for bar, title in zip(bars, titles):
         y = bar.get_y()
         height = bar.get_height()
 
-        #print(title, y + height * .25)
-
-        # TODO: bar.text() book title
-
-        # put title into the middle of the bar
-        # ax.text(30, y + height * .25, title, color='black', fontweight='bold')
-        text = ax.text(min(50.0, min_pop/4), y + height/2, title, color='white',
-                       fontweight='bold', va='center')
-        # add a black outline to text so it is visible on all backgrounds
+        # put book title into left-center of bar
+        text = ax.text(min(50.0, min_pop * .25), y + height * .4, title,
+                       color='white', fontweight='bold', va='center')
+        # add a black outline to white text so it is visible on all backgrounds
         text.set_path_effects([
-            path_effects.Stroke(linewidth=2, foreground='black'),
+            # black outline
+            path_effects.Stroke(linewidth=2.5, foreground='black'),
+            # white text itself
             path_effects.Normal(),
         ])
-
-        # TODO: remove bar_colours from zip?
-        #bar.set_color(col)
 
     canvas.draw()
 
@@ -344,11 +327,12 @@ def recommend_genres(member_id: str) -> list[str]:
 
         genres[genre] = genres.get(genre, 0) + 1
 
+    # sort genres by how many times the member has withdrawn a book of that
+    # genre, in descending order
     sorted_genres = sorted(genres.items(), key=lambda item: item[1],
                            reverse=True)
-    sorted_genres: list[str] = [genre for (genre, _) in sorted_genres]
 
-    return sorted_genres
+    return [genre for (genre, _) in sorted_genres]
 
 
 def recommend_titles_for_genre(genre: str) -> list[tuple[str, int]]:
@@ -368,6 +352,7 @@ def recommend_titles_for_genre(genre: str) -> list[tuple[str, int]]:
         pop = _book_popularity_id(book_id)
         title_pops[book.title] = title_pops.get(book.title, 0) + pop
 
+    # sort titles in descending popularity order
     most_popular_titles: list[tuple[str, int]] = sorted(title_pops.items(),
                                                         key=lambda tup: tup[1],
                                                         reverse=True)
@@ -387,5 +372,4 @@ def _book_popularity_id(book_id: int) -> int:
     :return: the popularity of the book
     """
     book_logs = database.logs_for_book_id(book_id)
-    popularity = len(book_logs)
-    return popularity
+    return len(book_logs)
