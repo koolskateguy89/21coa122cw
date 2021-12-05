@@ -88,9 +88,8 @@ def get_frame(parent) -> LabelFrame:
 
 def on_show():
     """
-    Hide results and set focus on the title entry when this frame is shown.
+    Set focus on the query entry when this frame is shown.
     """
-    hide_results()
     query_entry.focus_set()
 
 
@@ -193,7 +192,7 @@ def search_by_param(attr, query, ignore_case=False, contains=False) -> \
     :param ignore_case: whether to ignore casing or not
     :param contains: whether to check if the attribute contains the query or if
                         they are equal
-    :return: list of books with the given title
+    :return: list of books that match the given condition
     """
 
     # convert book attribute to str because 'id' is stored as int
