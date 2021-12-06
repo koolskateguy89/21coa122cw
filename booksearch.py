@@ -231,7 +231,7 @@ def _should_highlight(book: SimpleNamespace) -> bool:
     :param book: the book to check
     :return: whether the book should be highlighted
     """
-    logs: list[dict] = database.logs_for_book_id(book.id)
+    logs = database.logs_for_book_id(book.id)
 
     for log in logs:
         if (database.log_is_on_loan(log) and

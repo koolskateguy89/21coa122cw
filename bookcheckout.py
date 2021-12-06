@@ -195,6 +195,7 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
     held_book_ids = [str(log['book_id']) for log in logs
                      if database.log_is_on_loan(log) and
                      database.is_more_than_60_days_ago(log['checkout'])]
+    held_book_ids.sort(key=int)
 
     warning_msg = None
 

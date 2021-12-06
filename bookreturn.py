@@ -209,11 +209,12 @@ def _books_on_loan_for_member(*_):
 
 def _get_selected_book() -> int | None:
     """
-    Return the ID of the book currently selected in the tree.
+    Return the ID of the book currently selected in the tree, or None if no item
+    is selected.
 
     :return: the ID of the selected book
     """
-    # get the selected item in the tree
+    # get the currently selected item in the tree
     selected_item = tree.item(tree.focus())
     book_as_list = selected_item['values']
 
@@ -307,7 +308,7 @@ def return_book(*book_ids: int) -> tuple[str | None, str | None, str | None]:
 
         book.member = '0'
 
-        book_logs: list[dict] = database.logs_for_book_id(book_id)
+        book_logs = database.logs_for_book_id(book_id)
 
         # get the log that was the checkout of this book
         log = None
@@ -352,7 +353,7 @@ def _warning(overdue: list[str]) -> str | None:
     """
     if not overdue:
         return None
-    return f"Book(s) {{{','.join(overdue)}}} returned after 60 days"
+    return f"Book(s) {{{','.join(overdue)}}} was/were returned after 60 days"
 
 
 # tests

@@ -29,6 +29,7 @@ import csv
 from datetime import datetime
 from functools import cache
 from types import SimpleNamespace
+from typing import Generator
 
 DATE_FORMAT = '%d/%m/%Y'
 NOW = datetime.now()
@@ -135,14 +136,17 @@ def logs_for_member_id(member_id: str) -> list[dict]:
     return [log for log in logs if log['member'] == member_id]
 
 
-def logs_for_book_id(book_id: int) -> list[dict]:
+def logs_for_book_id(book_id: int) -> Generator[dict, None, None]:
     """
     Return all logs corresponding to a given book ID.
 
     :param book_id: the book ID to search for
     :return: all logs for the book
     """
-    return [log for log in logs if log['book_id'] == book_id]
+    for log in logs:
+        if log['book_id'] == book_id:
+            yield log
+    #return [log for log in logs if log['book_id'] == book_id]
 
 
 def new_log(book_id: int, member_id: str) -> dict:

@@ -357,10 +357,8 @@ def recommend_titles_for_genre(genre: str) -> list[tuple[str, int]]:
                                                         key=lambda tup: tup[1],
                                                         reverse=True)
 
-    # limit to 10 titles
-    most_popular_titles = most_popular_titles[:10]
-
-    return most_popular_titles
+    # limit to 10 most popular titles
+    return most_popular_titles[:10]
 
 
 def _book_popularity_id(book_id: int) -> int:
@@ -372,4 +370,4 @@ def _book_popularity_id(book_id: int) -> int:
     :return: the popularity of the book
     """
     book_logs = database.logs_for_book_id(book_id)
-    return len(book_logs)
+    return sum(1 for _ in book_logs)
