@@ -51,10 +51,11 @@ def get_frame(parent) -> LabelFrame:
     bg, fg = 'black', '#f8f8ff'
 
     frame = LabelFrame(parent, text="Book Return", padx=5, pady=5, bg=bg, fg=fg)
+    # put columns 0 and 1 in the middle (horizontally)
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_columnconfigure(1, weight=1)
 
-    _create_on_loan_frame(frame, bg)
+    _create_on_loan_frame(frame, bg).grid(row=0, column=0, sticky=NS)
 
     return_frame = Frame(frame, bg=bg)
     return_frame.grid(row=0, column=1, sticky=NS)
@@ -66,6 +67,7 @@ def get_frame(parent) -> LabelFrame:
         .grid(row=0, column=0)
     ids_entry = Entry(input_frame, borderwidth=3)
     ids_entry.grid(row=0, column=1)
+    ids_entry.bind('<Return>', _return)
 
     Button(return_frame, text="Return", command=_return).grid(pady=10)
 
@@ -103,9 +105,11 @@ def on_show():
     _hide_status()
 
 
-def _return():
+def _return(*_):
     """
     Return given book(s) and notify librarian of status.
+
+    :param _: unused varargs to allow this to be used as any callback
     """
     _hide_status()
     ids = ids_entry.get().split(',')
@@ -136,14 +140,20 @@ def _return0(*ids: int):
     if success is not None:
         _show_status(success)
 
+    # update the tree so it doesn't show any books that were just returned
+    _books_on_loan_for_member()
+    # hide tree_button because nothing will be selected
+    tree_button.grid_remove()
+
 
 def _create_on_loan_frame(parent, bg):
     """
-    Create a decorate the frame to show the books that a member currently has on
-    loan.
+    Create and decorate the frame to show the books that a member currently has
+    on loan.
 
     :param parent: the root frame to put this frame inside
-    :param bg: background colour
+    :param bg: background color of the frame
+    :return: the frame
     """
     global member_id
     global tree_frame
@@ -151,7 +161,6 @@ def _create_on_loan_frame(parent, bg):
     global tree_button
 
     member_id_frame = Frame(parent, bg=bg)
-    member_id_frame.grid(row=0, column=0, sticky=NS)
 
     Label(member_id_frame, text="Member ID:", bg=bg, fg='white').pack()
 
@@ -162,7 +171,8 @@ def _create_on_loan_frame(parent, bg):
 
     tree_frame = Frame(parent, bg=bg, pady=10)
 
-    # there's no need to show memberID
+    # there's no need to show memberID as all books shown will be loaned out to
+    # the member
     headers = ('ID', 'Genre', 'Title', 'Author', 'Purchase Date')
 
     tree = ttk.Treeview(tree_frame, columns=headers, show='headings')
@@ -177,13 +187,25 @@ def _create_on_loan_frame(parent, bg):
     tree.configure(yscroll=sb.set)
     sb.grid(row=0, column=1, sticky=NS)
 
-    tree_button = Button(tree_frame, command=_return_tree)
+    select_frame = Frame(tree_frame, bg=bg)
+    select_frame.grid(row=1, columnspan=2, pady=10)
+
+    Button(select_frame, text='Select All',
+           command=lambda: tree.selection_add(*tree.get_children())) \
+        .grid(row=0, column=0, padx=10)
+    Button(select_frame, text='Deselect All',
+           command=lambda: tree.selection_remove(*tree.selection())) \
+        .grid(row=0, column=1, padx=10)
+
+    tree_button = Button(tree_frame, command=_return_selected)
     # configure tree_button grid options to make re-adding easier
-    tree_button.grid(row=1, columnspan=2, pady=20)
+    tree_button.grid(row=2, columnspan=2, pady=20)
     tree_button.grid_remove()
 
-    # when a book is selected, update tree_button's text to say the book ID
-    tree.bind('<ButtonRelease-1>', _update_tree_button)
+    # when a book is selected, update tree_button's text to say the book IDs
+    tree.bind('<<TreeviewSelect>>', _update_tree_button)
+
+    return member_id_frame
 
 
 def _books_on_loan_for_member(*_):
@@ -200,52 +222,48 @@ def _books_on_loan_for_member(*_):
 
     books_on_loan = database.search_books_by_param('member', member).values()
     for book in books_on_loan:
-        book = vars(book)
-        tree.insert('', index=END, values=tuple(book.values()))
+        book_dict = vars(book)
+        tree.insert('', index=END, values=tuple(book_dict.values()))
 
     if books_on_loan:
         tree_frame.place(x=30, y=100)
 
 
-def _get_selected_book() -> int | None:
+def _get_selected_book_ids() -> list[int]:
     """
-    Return the ID of the book currently selected in the tree, or None if no item
-    is selected.
+    Return the IDs of the books currently selected in the tree.
 
-    :return: the ID of the selected book
+    :return: the IDs of the selected books
     """
-    # get the currently selected item in the tree
-    selected_item = tree.item(tree.focus())
-    book_as_list = selected_item['values']
-
-    return None if not book_as_list else book_as_list[0]
+    # get the iids of the items currently selected in the tree
+    selected = tree.selection()
+    return [tree.item(s)['values'][0] for s in selected]
 
 
-def _update_tree_button(*_):
-    """
-    Update the tree button to say the ID of the currently selected book.
-
-    :param _: unused varargs to allow this to be used as any callback
-    """
-    book_id = _get_selected_book()
-    if book_id is not None:
-        tree_button.configure(text=f'Return {book_id}')
-        tree_button.grid()
-
-
-def _return_tree():
+def _return_selected():
     """
     Return the book currently selected in the tree.
     """
     _hide_status()
 
-    book_id = _get_selected_book()
-    _return0(book_id)
+    book_ids = _get_selected_book_ids()
+    _return0(*book_ids)
 
-    # update the tree so it doesn't show the book that was just returned
-    _books_on_loan_for_member()
-    # hide tree_button because the selected book has been returns
-    tree_button.grid_remove()
+
+def _update_tree_button(*_):
+    """
+    Update the tree button to say the IDs of the currently selected books.
+
+    :param _: unused varargs to allow this to be used as any callback
+    """
+    book_ids = _get_selected_book_ids()
+    text = f"Return {','.join(map(str, book_ids))}"
+    tree_button.configure(text=text)
+
+    if book_ids:
+        tree_button.grid()
+    else:
+        tree_button.grid_remove()
 
 
 def _show_warning(msg):
@@ -346,14 +364,19 @@ def _success(returned: list[str]) -> str | None:
 
 def _warning(overdue: list[str]) -> str | None:
     """
-    Return the warning message for def return_book
+    Return the warning message for def return_book given an amount of overdue
+    books.
 
     :param overdue: the IDs of books that were returned after 60 days
     :return: 'warning message' of def return_book
     """
     if not overdue:
         return None
-    return f"Book(s) {{{','.join(overdue)}}} was/were returned after 60 days"
+
+    if len(overdue) == 1:
+        return f'Book {overdue[0]} was returned after 60 days'
+    else:
+        return f"Books {','.join(overdue)} were returned after 60 days"
 
 
 # tests
