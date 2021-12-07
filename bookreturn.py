@@ -75,21 +75,21 @@ def get_frame(parent) -> LabelFrame:
                              bg='red', fg=bg)
     # configure the error frame's grid options to be before the warning frame
     error_frame.grid(row=100, pady=5)
-    error_label = Label(error_frame, bg=bg, fg=fg)
+    error_label = Label(error_frame, bg=bg, fg=fg, wraplength=300)
     error_label.pack()
 
     warning_frame = LabelFrame(return_frame, text="Warning", padx=1, pady=5,
                                bg='yellow', fg=bg)
     # configure the warning frame's grid options to be before the success frame
     warning_frame.grid(row=101, pady=5)
-    warning_label = Label(warning_frame, bg=bg, fg=fg)
+    warning_label = Label(warning_frame, bg=bg, fg=fg, wraplength=300)
     warning_label.pack()
 
     success_frame = LabelFrame(return_frame, text="Error", padx=1, pady=5,
                                bg='green', fg=bg)
     # configure the success frame's grid options to be after the warning frame
     success_frame.grid(row=102, pady=5)
-    success_label = Label(success_frame, bg=bg, fg=fg)
+    success_label = Label(success_frame, bg=bg, fg=fg, wraplength=300)
     success_label.pack()
 
     # hide status frames
@@ -146,7 +146,7 @@ def _return0(*ids: int):
     tree_button.grid_remove()
 
 
-def _create_on_loan_frame(parent, bg):
+def _create_on_loan_frame(parent, bg) -> Frame:
     """
     Create and decorate the frame to show the books that a member currently has
     on loan.
@@ -179,7 +179,7 @@ def _create_on_loan_frame(parent, bg):
     tree.grid(row=0, column=0)
 
     for header in headers:
-        tree.column(header, width=70)
+        tree.column(header, width=90)
         tree.heading(header, text=header)
     tree.column('ID', anchor=CENTER, width=30)
 
@@ -197,7 +197,7 @@ def _create_on_loan_frame(parent, bg):
            command=lambda: tree.selection_remove(*tree.selection())) \
         .grid(row=0, column=1, padx=10)
 
-    tree_button = Button(tree_frame, command=_return_selected)
+    tree_button = Button(tree_frame, wraplength=250, command=_return_selected)
     # configure tree_button grid options to make re-adding easier
     tree_button.grid(row=2, columnspan=2, pady=20)
     tree_button.grid_remove()
