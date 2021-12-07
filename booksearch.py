@@ -19,10 +19,12 @@ attr: StringVar = None
 query_entry: Entry = None
 query: StringVar = None
 ignore_case: IntVar = None
-contains: IntVar = None
 
 results_wrapper: Frame = None
 tree: ttk.Treeview = None
+
+
+# TODO: list all books ?
 
 
 def get_frame(parent) -> LabelFrame:
@@ -37,7 +39,6 @@ def get_frame(parent) -> LabelFrame:
     global query_entry
     global query
     global ignore_case
-    global contains
     global results_wrapper
 
     bg, fg = 'black', '#f8f8ff'
@@ -70,13 +71,6 @@ def get_frame(parent) -> LabelFrame:
     Checkbutton(frame, text="Ignore case", bg=fg, fg=bg,
                 activebackground=fg, activeforeground=bg,
                 variable=ignore_case).pack(pady=5)
-
-    contains = IntVar()
-    # search when contains is modified
-    contains.trace_add('write', _search)
-    Checkbutton(frame, text="Contains", bg=fg, fg=bg,
-                activebackground=fg, activeforeground=bg,
-                variable=contains).pack(pady=5)
 
     Button(frame, text="Search", font='sans 12 bold', command=_search) \
         .pack(pady=5)
@@ -133,19 +127,18 @@ def _search(*_):
 
     results: list[SimpleNamespace] = search_by_param(attr.get(),
                                                      query_,
-                                                     ignore_case.get(),
-                                                     contains.get())
+                                                     ignore_case.get())
 
     for book in results:
         tags = ('highlight',) if _should_highlight(book) else ()
 
         # mutate some values to give librarian a better experience
-        book = {**vars(book),
-                # if book is available, don't show anyone as member
-                'member': member if (member := book.member) != '0' else '_'
-                }
+        book_dict = {**vars(book),
+                     # if book is available, don't show anyone as member
+                     'member': member if (member := book.member) != '0' else '_'
+                     }
 
-        tree.insert('', index=END, values=tuple(book.values()), tags=tags)
+        tree.insert('', index=END, values=tuple(book_dict.values()), tags=tags)
 
     if results:
         display_results()
@@ -172,55 +165,46 @@ def _clear_results():
     tree.delete(*tree.get_children())
 
 
-def search_by_param(attr, query, ignore_case=False, contains=False) -> \
-        list[SimpleNamespace]:
+def search_by_param(attr, query, ignore_case=False) -> list[SimpleNamespace]:
     """
     Search for books whose attribute 'attr' match the given query.
-    Search for all books who meet a filter of query
 
-    Whether the attribute matches the query depends on the values of ignore_case
-    and contains.
+    Whether the attribute matches the query depends on the values of
+    ignore_case.
 
     If ignore_case is True, the casing of the attribute and query are both
     ignored.
 
-    If contains is True, they match if the attribute contains the query; else
-    they match is the attribute is equal to the query.
+    The attribute matches the query if it contains the query.
 
     :param attr: the attribute of the book to search for
     :param query: the value to check the book attribute against
     :param ignore_case: whether to ignore casing or not
-    :param contains: whether to check if the attribute contains the query or if
-                        they are equal
     :return: list of books that match the given condition
     """
+    query = str(query)
 
     # convert book attribute to str because 'id' is stored as int
     get_value = lambda book: str(getattr(book, attr)) if not ignore_case else \
         str(getattr(book, attr)).casefold()
-    is_valid = lambda value, query: value == query if not contains else \
-        query in value
 
     if ignore_case:
         query = query.casefold()
 
     return [book for book in database.books.values()
-            if is_valid(get_value(book), query)]
+            if query in get_value(book)]
 
 
-def search_by_title(title, ignore_case=False, contains=False) -> \
-        list[SimpleNamespace]:
+def search_by_title(title, ignore_case=False) -> list[SimpleNamespace]:
     """
-    Return all books with the given title, ignoring casing if specified and
-    including books whose title contains the given title.
+    Return all books whose titles contain the given title, ignoring casing if
+    specified and including books whose title contains the given title.
 
     :param title: the search param
     :param ignore_case: whether to ignore casing or not
-    :param contains: if True, return books that contain the given query, else
-                     return books whose title is exactly the query
     :return: list of books with the given title
     """
-    return search_by_param('title', title, ignore_case, contains)
+    return search_by_param('title', title, ignore_case)
 
 
 def _should_highlight(book: SimpleNamespace) -> bool:
