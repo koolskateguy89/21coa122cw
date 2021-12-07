@@ -24,9 +24,6 @@ results_wrapper: Frame = None
 tree: ttk.Treeview = None
 
 
-# TODO: list all books ?
-
-
 def get_frame(parent) -> LabelFrame:
     """
     Create and decorate the frame for searching for books.

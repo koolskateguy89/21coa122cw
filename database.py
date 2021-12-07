@@ -146,7 +146,6 @@ def logs_for_book_id(book_id: int) -> Generator[dict, None, None]:
     for log in logs:
         if log['book_id'] == book_id:
             yield log
-    #return [log for log in logs if log['book_id'] == book_id]
 
 
 def new_log(book_id: int, member_id: str) -> dict:
