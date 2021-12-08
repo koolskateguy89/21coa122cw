@@ -24,11 +24,13 @@ results_wrapper: Frame = None
 tree: ttk.Treeview = None
 
 
-def get_frame(parent) -> LabelFrame:
+def get_frame(parent, bg, fg) -> LabelFrame:
     """
     Create and decorate the frame for searching for books.
 
     :param parent: the parent of the frame
+    :param bg: the background color
+    :param fg: the foreground color
     :return: the fully decorated frame
     """
     global frame
@@ -37,8 +39,6 @@ def get_frame(parent) -> LabelFrame:
     global query
     global ignore_case
     global results_wrapper
-
-    bg, fg = 'black', '#f8f8ff'
 
     frame = LabelFrame(parent, text="Book Search", padx=5, pady=5, bg=bg, fg=fg)
 

@@ -1,7 +1,7 @@
 """
 This modules provides functionality for the librarian to return books. It asks
-for the ID of the books they wish to return and either displays an appropriate
-error message or a message letting them know the books have been successfully
+for the IDs of the books they wish to return and displays an appropriate error
+message or a message letting them know the books have been successfully
 returned.
 
 The librarian can enter a member's ID and the books that member has on loan are
@@ -9,7 +9,9 @@ displayed. The librarian can then select one of these books and press a button
 to return that book.
 
 When a book is returned, the most recent transaction log for that book is
-updated with a return date to signify that the book has been returned.
+updated to have a return date to signify that the book has been returned.
+
+If a book is being returned
 """
 
 from datetime import datetime
@@ -33,11 +35,13 @@ tree: ttk.Treeview = None
 tree_button: Button = None
 
 
-def get_frame(parent) -> LabelFrame:
+def get_frame(parent, bg, fg) -> LabelFrame:
     """
     Create and decorate the frame for checking out books.
 
     :param parent: the parent of the frame
+    :param bg: the background color
+    :param fg: the foreground color
     :return: the fully decorated frame
     """
     global ids_entry
@@ -47,8 +51,6 @@ def get_frame(parent) -> LabelFrame:
     global warning_label
     global success_frame
     global success_label
-
-    bg, fg = 'black', '#f8f8ff'
 
     frame = LabelFrame(parent, text="Book Return", padx=5, pady=5, bg=bg, fg=fg)
     # put columns 0 and 1 in the middle (horizontally)

@@ -6,7 +6,7 @@ It checks all inputs are valid, displaying any errors and warnings. If the book
 is available, its status is updated in the database and the logfile is updated
 with a new entry to signify that the book has been withdrawn.
 
-If the member is currently holding any books more than 60 days, a warning
+If the member is currently holding any books for more than 60 days, a warning
 message is shown to the librarian about these books.
 """
 
@@ -32,11 +32,13 @@ success_frame: LabelFrame = None
 success_label: Label = None
 
 
-def get_frame(parent) -> LabelFrame:
+def get_frame(parent, bg, fg) -> LabelFrame:
     """
     Create and decorate the frame for checking out books.
 
     :param parent: the parent of the frame
+    :param bg: the background color
+    :param fg: the foreground color
     :return: the fully decorated frame
     """
     global member_entry
@@ -48,8 +50,6 @@ def get_frame(parent) -> LabelFrame:
     global error_label
     global success_frame
     global success_label
-
-    bg, fg = 'black', '#f8f8ff'
 
     frame = LabelFrame(parent, text="Book Checkout", padx=5, pady=5, bg=bg,
                        fg=fg)
@@ -299,7 +299,7 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
     Withdraw given book(s) to a given member, update the database and logfile.
 
     :param member_id: the ID of the member who wants to withdraw book(s)
-    :param book_ids: the ID(s) of the book(s) the member wants to checkout
+    :param book_ids: the ID(s) of the book(s) the member wants to check out
     :return: (error message, warning message, success message)
     """
     withdrawn = []

@@ -7,6 +7,7 @@ other program functionalities.
 
 It has been tested and is working.
 """
+# TODO: Also state who wrote it and when.
 
 from tkinter import *
 from tkinter import ttk
@@ -27,7 +28,7 @@ modules = {
 menu: LabelFrame = None
 notebook: ttk.Notebook = None
 
-bg, fg = 'black', 'white'
+bg, fg = 'black', '#f8f8ff'
 
 
 def _on_tab_selected(event):
@@ -70,6 +71,7 @@ def _show_frame(frame):
 def _menu_button(text, module) -> Button:
     """
     Return a standardised Button that acts as a menu option.
+
     :param text: the button text
     :param module: the module the button will open
     :return: a decorated button
@@ -125,7 +127,7 @@ def main():
     for text, module in modules.items():
         _menu_button(text, module).pack(pady=5)
 
-        frame = module.get_frame(notebook)
+        frame = module.get_frame(notebook, bg, fg)
         notebook.add(frame, text=text)
 
     _show_frame(menu)

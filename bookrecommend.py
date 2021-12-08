@@ -51,11 +51,13 @@ error_frame: Frame = None
 error_label: Label = None
 
 
-def get_frame(parent) -> LabelFrame:
+def get_frame(parent, bg, fg) -> LabelFrame:
     """
     Create and decorate the frame for recommending books.
 
     :param parent: the parent of the frame
+    :param bg: the background color
+    :param fg: the foreground color
     :return: the fully decorated frame
     """
     global id_entry
@@ -63,15 +65,13 @@ def get_frame(parent) -> LabelFrame:
     global error_frame
     global error_label
 
-    bg = 'black'
-
     frame = LabelFrame(parent, text="Book Recommend", padx=5, pady=2, bg=bg,
-                       fg='#f8f8ff')
+                       fg=fg)
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
 
-    Label(input_frame, text="Enter member ID:", bg=bg, fg='white') \
+    Label(input_frame, text="Enter member ID:", bg=bg, fg=fg) \
         .grid(row=0, column=0, pady=7)
     id_entry = Entry(input_frame, borderwidth=3)
     id_entry.focus_set()
@@ -81,13 +81,13 @@ def get_frame(parent) -> LabelFrame:
 
     Button(frame, text="Recommend", command=_recommend).pack(pady=2)
 
-    results_frame = LabelFrame(frame, text="Recommendations", bg=bg, fg='white',
+    results_frame = LabelFrame(frame, text="Recommendations", bg=bg, fg=fg,
                                padx=5, pady=5, relief=RAISED)
     _generate_results_view()
 
-    error_frame = LabelFrame(frame, text="Error", bg='red', fg='white',
+    error_frame = LabelFrame(frame, text="Error", bg='red', fg=fg,
                              relief=RAISED)
-    error_label = Label(error_frame, bg=bg, fg='white')
+    error_label = Label(error_frame, bg=bg, fg=fg)
     error_label.pack()
 
     return frame

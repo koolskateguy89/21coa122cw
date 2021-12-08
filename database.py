@@ -39,8 +39,8 @@ NOW = datetime.now()
 
 def _read_database() -> dict[int, SimpleNamespace]:
     """
-    Read the database file and parse it into a dictionary, with key the book id
-    and value the SimpleNamespace object representing the book.
+    Read the database file and parse it into a dictionary, with key book id and
+    value the SimpleNamespace object representing the book.
 
     :return: a dictionary representing the database
     """
