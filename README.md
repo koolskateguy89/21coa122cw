@@ -19,10 +19,10 @@ Simple library management system for a librarian
 
 `database.txt` has to be organised as:
 
-| ID  | Genre | Title | Author | Purchase Date | Member |
-| --- | ----- | ----- | ------ | ------------- | ------ |
-| 1 | Sci-Fi | Book_1 | Author_1 | 1/8/2010 | coai |
-| 2 | Fantasy | Book_3 | Author_2 | 1/8/2014 | 0 |
+| ID  | Genre   | Title  | Author   | Purchase Date | Member |
+|-----|---------|--------|----------|---------------|--------|
+| 1   | Sci-Fi  | Book_1 | Author_1 | 1/8/2010      | coai   |
+| 2   | Fantasy | Book_3 | Author_2 | 1/8/2014      | 0      |
 
 ### Members
 
