@@ -1,3 +1,13 @@
+"""
+1835
+bookcheckout.py: 384
+bookrecommend.py: 373
+bookreturn.py: 403
+booksearch.py: 259
+database.py: 278
+menu.py: 138
+"""
+
 from os import listdir
 from os.path import isfile, join
 
@@ -25,5 +35,7 @@ for f in files:
         pass
 
 print(sum_)
-print(lens)
+for f, l in lens.items():
+    print(f'{f}: {l}')
+#print(lens)
 print(len(lens), len(files))
