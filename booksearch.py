@@ -5,6 +5,8 @@ using the database module to query the book database.
 The search function allows for searching for books according to its id, genre,
 title, author or member. It also allows casing to be ignored and to search for
 books whose attribute contains the given query.
+
+Written by Dara Agbola between 8th November and 8th December 2021.
 """
 
 from tkinter import *

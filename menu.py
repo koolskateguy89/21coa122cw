@@ -6,8 +6,9 @@ This module graphically defines the menu for the librarian to be able to access
 other program functionalities.
 
 It has been tested and is working.
+
+Written by Dara Agbola between 8th November and 8th December 2021.
 """
-# TODO: Also state who wrote it and when.
 
 from tkinter import *
 from tkinter import ttk
@@ -54,8 +55,8 @@ def _show_module(module):
 
     :param module: the module to show
     """
-    idx = list(modules.values()).index(module) + 1
-    notebook.select(idx)
+    idx = list(modules.values()).index(module)
+    notebook.select(idx + 1)
     _show_frame(notebook)
 
 

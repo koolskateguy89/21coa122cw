@@ -11,7 +11,10 @@ to return that book.
 When a book is returned, the most recent transaction log for that book is
 updated to have a return date to signify that the book has been returned.
 
-If a book is being returned
+If a book is being returned after 60 days of being on loan, the librarian is
+warned.
+
+Written by Dara Agbola between 8th November and 8th December 2021.
 """
 
 from datetime import datetime

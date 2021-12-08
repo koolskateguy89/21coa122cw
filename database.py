@@ -23,6 +23,8 @@ Logs are also represented by dicts:
   Books that haven't been returned yet have None as 'return'
 
 The logfile is represented as a list[dict].
+
+Written by Dara Agbola between 8th November and 8th December 2021.
 """
 
 import csv

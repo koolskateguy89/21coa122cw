@@ -1,5 +1,5 @@
 """
-This module provides functionality to checkout books. It asks the librarian for
+This module provides functionality to check out books. It asks the librarian for
 the borrowers' member ID and the ID of the book(s) they wish to withdraw.
 
 It checks all inputs are valid, displaying any errors and warnings. If the book
@@ -8,6 +8,8 @@ with a new entry to signify that the book has been withdrawn.
 
 If the member is currently holding any books for more than 60 days, a warning
 message is shown to the librarian about these books.
+
+Written by Dara Agbola between 8th November and 8th December 2021.
 """
 
 from tkinter import *
@@ -188,7 +190,7 @@ def _update_tree_button(*_):
     :param _: unused varargs to allow this to be used as any callback
     """
     book_ids = _get_selected_book_ids()
-    text = f"Checkout {','.join(map(str, book_ids))}"
+    text = f"Check out {','.join(map(str, book_ids))}"
     tree_button.configure(text=text)
 
     if book_ids:

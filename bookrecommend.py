@@ -20,6 +20,8 @@ Book recommendations are displayed in a bar chart which shows the title and the
 popularity of the title.
 
 It has been tested and is working.
+
+Written by Dara Agbola between 8th November and 8th December 2021.
 """
 
 import random
