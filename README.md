@@ -1,5 +1,28 @@
 # 21COA122cw
 
+## Stack Overflow stuff
+
+### bookrecommend:
+
+Get list of values from list of tuples  
+e.g. `[('a', 1), ('b', 2)]` -> `['a', 'b']` and `[1, 2]`
+```python
+# https://stackoverflow.com/a/69878556/17381629
+_plot(*zip(*sorted_results))
+```
+
+Generate `n` unique colours from a colormap
+```python
+# length = how many colours to generate
+# cmap = colormap
+# https://stackoverflow.com/a/8391452/17381629
+norm = colors.Normalize(vmin=0, vmax=length - 1)  
+scalar_map = mplcm.ScalarMappable(norm=norm, cmap=cmap)
+
+return [scalar_map.to_rgba(i) for i in range(length)]
+```
+
+
 ## Overview
 
 Simple library management system for a librarian

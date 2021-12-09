@@ -1,17 +1,18 @@
-max 500 words
-
 Software versions
   - Python v3.10.0
   - matplotlib v3.5.0
 
+NOTE: The test code may give false negatives if the database or logfile have been
+modified.
+
 Additional features:
 - Book searching
   - Search by any book attribute
-  - Ignore case
-  - Contains
-
-The test code may give false negatives if the database or logfile have been
-modified.
+  - Case sensitive/insensitive
+- Book checkout
+  - GUI select from list of available books
+- Book return
+  - GUI select from list of books member has loaned out
 
 Proud of:
   1. booksearch as you type into Entry
