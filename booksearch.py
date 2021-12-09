@@ -143,7 +143,7 @@ def _sort_tree_column(column, reverse):
     column_values.sort(reverse=reverse)
 
     # rearrange items into new sorted positions
-    for index, (val, iid) in enumerate(column_values):
+    for index, (value, iid) in enumerate(column_values):
         tree.move(iid, '', index)
 
     # reverse sort next time
