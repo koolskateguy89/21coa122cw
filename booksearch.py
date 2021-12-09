@@ -12,6 +12,7 @@ Written by Dara Agbola between 8th November and 8th December 2021.
 from tkinter import *
 from tkinter import ttk
 from types import SimpleNamespace
+from typing import Iterable
 
 import database
 from database import str_to_date
@@ -72,6 +73,9 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     Checkbutton(frame, text='Case Sensitive', bg=fg, fg=bg,
                 activebackground=fg, activeforeground=bg,
                 variable=exact_case).pack(pady=5)
+
+    Button(frame, text='Show All Books', command=_show_all_books, bg=fg, fg=bg) \
+        .pack(pady=5)
 
     _create_results_view()
 
@@ -164,19 +168,37 @@ def _search(*_):
                                                      query_,
                                                      not exact_case.get())
 
-    for book in results:
+    _show_books(results)
+
+    if results:
+        display_results()
+
+
+def _show_all_books():
+    """
+    Show all books in the database on screen.
+    """
+    _clear_results()
+    _show_books(database.books.values())
+    display_results()
+
+
+def _show_books(books: Iterable[SimpleNamespace]):
+    """
+    Show given books on screen by inserting them to the end of the tree.
+
+    :param books: the books to show in the tree
+    """
+    for book in books:
         tags = ('highlight',) if _should_highlight(book) else ()
 
-        # mutate some values to give librarian a better experience
+        # mutate some values to give the librarian a better experience
         book_dict = {**vars(book),
                      # if book is available, don't show anyone as member
                      'member': member if (member := book.member) != '0' else '-'
                      }
 
         tree.insert('', index=END, values=tuple(book_dict.values()), tags=tags)
-
-    if results:
-        display_results()
 
 
 def display_results():
