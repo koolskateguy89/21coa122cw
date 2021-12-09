@@ -9,7 +9,7 @@ with a new entry to signify that the book has been withdrawn.
 If the member is currently holding any books for more than 60 days, a warning
 message is shown to the librarian about these books.
 
-Written by Dara Agbola between 8th November and 8th December 2021.
+Written by Dara Agbola between 8th November and 9th December 2021.
 """
 
 from tkinter import *
@@ -53,7 +53,7 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     global success_frame
     global success_label
 
-    frame = LabelFrame(parent, text="Book Checkout", padx=5, pady=5, bg=bg,
+    frame = LabelFrame(parent, text='Book Checkout', padx=5, pady=5, bg=bg,
                        fg=fg)
     # put columns 0 and 1 in the middle (horizontally)
     frame.grid_columnconfigure(0, weight=1)
@@ -67,7 +67,7 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     input_frame = Frame(checkout_frame, bg=bg)
     input_frame.pack()
 
-    Label(input_frame, text="Enter member ID:", bg=bg, fg=fg, width=21,
+    Label(input_frame, text='Enter member ID:', bg=bg, fg=fg, width=21,
           anchor=W).grid(row=0, column=0, pady=7)
     member_entry = Entry(input_frame, borderwidth=3)
     member_entry.focus_set()
@@ -80,18 +80,18 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     # checkout book when Enter is pressed
     ids_entry.bind('<Return>', lambda event: _checkout())
 
-    Button(checkout_frame, text="Checkout", command=_checkout).pack(pady=10)
+    Button(checkout_frame, text='Checkout', command=_checkout).pack(pady=10)
 
-    warning_frame = LabelFrame(checkout_frame, text="Warning", padx=1,
+    warning_frame = LabelFrame(checkout_frame, text='Warning', padx=1,
                                bg='yellow')
     warning_label = Label(warning_frame, bg=bg, fg=fg, wraplength=300)
     warning_label.pack()
 
-    error_frame = LabelFrame(checkout_frame, text="Error", padx=1, bg='red')
+    error_frame = LabelFrame(checkout_frame, text='Error', padx=1, bg='red')
     error_label = Label(error_frame, bg=bg, fg=fg, wraplength=300)
     error_label.pack()
 
-    success_frame = LabelFrame(checkout_frame, text="Success", padx=1,
+    success_frame = LabelFrame(checkout_frame, text='Success', padx=1,
                                bg='green')
     success_label = Label(success_frame, bg=bg, fg=fg, wraplength=300)
     success_label.pack()
@@ -140,6 +140,7 @@ def _create_available_frame(parent, bg) -> Frame:
         tree.column(header, width=90)
         tree.heading(header, text=header)
     tree.column('ID', anchor=CENTER, width=30)
+    tree.column('Purchase Date', anchor=CENTER)
 
     sb = Scrollbar(frame, orient=VERTICAL, command=tree.yview)
     tree.configure(yscroll=sb.set)
@@ -179,7 +180,7 @@ def _get_selected_book_ids() -> list[int]:
     """
     # get the iids of the items currently selected in the tree
     selected = tree.selection()
-    return [tree.item(s)['values'][0] for s in selected]
+    return [tree.item(iid)['values'][0] for iid in selected]
 
 
 def _update_tree_button(*_):
@@ -190,7 +191,7 @@ def _update_tree_button(*_):
     :param _: unused varargs to allow this to be used as any callback
     """
     book_ids = _get_selected_book_ids()
-    text = f"Check out {','.join(map(str, book_ids))}"
+    text = f"Checkout {','.join(map(str, book_ids))}"
     tree_button.configure(text=text)
 
     if book_ids:
@@ -317,7 +318,7 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
         book = database.search_book_by_id(book_id)
 
         if book is None:
-            return error(f"No book with ID: {book_id}")
+            return error(f'No book with ID: {book_id}')
 
         if (member := book.member) != '0':
             return error(f"Book {book_id} is already on loan, to '{member}'")
@@ -338,8 +339,8 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
     warning_msg = None
 
     if held_book_ids:
-        warning_msg = f"Book(s) {{{','.join(held_book_ids)}}} are being held " \
-                      "for more than 60 days"
+        warning_msg = f"Book(s) {','.join(held_book_ids)} are being held for" \
+                       "more than 60 days"
 
     return None, warning_msg, _success(withdrawn)
 
@@ -357,11 +358,10 @@ def _success(withdrawn: list[str]) -> str | None:
     database.update_logfile()
     database.update_database()
 
-    return f"Book(s) {{{','.join(withdrawn)}}} withdrawn"
+    return f"Book(s) {','.join(withdrawn)} withdrawn"
 
 
-# tests
-def main():
+def test():
     """
     Main method which contains test code for this module.
     """
@@ -383,4 +383,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test()

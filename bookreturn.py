@@ -14,7 +14,7 @@ updated to have a return date to signify that the book has been returned.
 If a book is being returned after 60 days of being on loan, the librarian is
 warned.
 
-Written by Dara Agbola between 8th November and 8th December 2021.
+Written by Dara Agbola between 8th November and 9th December 2021.
 """
 
 from datetime import datetime
@@ -55,7 +55,7 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     global success_frame
     global success_label
 
-    frame = LabelFrame(parent, text="Book Return", padx=5, pady=5, bg=bg, fg=fg)
+    frame = LabelFrame(parent, text='Book Return', padx=5, pady=5, bg=bg, fg=fg)
     # put columns 0 and 1 in the middle (horizontally)
     frame.grid_columnconfigure(0, weight=1)
     frame.grid_columnconfigure(1, weight=1)
@@ -74,23 +74,23 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     ids_entry.grid(row=0, column=1)
     ids_entry.bind('<Return>', _return)
 
-    Button(return_frame, text="Return", command=_return).grid(pady=10)
+    Button(return_frame, text='Return', command=_return).grid(pady=10)
 
-    error_frame = LabelFrame(return_frame, text="Error", padx=1, pady=5,
+    error_frame = LabelFrame(return_frame, text='Error', padx=1, pady=5,
                              bg='red', fg=bg)
     # configure the error frame's grid options to be before the warning frame
     error_frame.grid(row=100, pady=5)
     error_label = Label(error_frame, bg=bg, fg=fg, wraplength=300)
     error_label.pack()
 
-    warning_frame = LabelFrame(return_frame, text="Warning", padx=1, pady=5,
+    warning_frame = LabelFrame(return_frame, text='Warning', padx=1, pady=5,
                                bg='yellow', fg=bg)
     # configure the warning frame's grid options to be before the success frame
     warning_frame.grid(row=101, pady=5)
     warning_label = Label(warning_frame, bg=bg, fg=fg, wraplength=300)
     warning_label.pack()
 
-    success_frame = LabelFrame(return_frame, text="Error", padx=1, pady=5,
+    success_frame = LabelFrame(return_frame, text='Error', padx=1, pady=5,
                                bg='green', fg=bg)
     # configure the success frame's grid options to be after the warning frame
     success_frame.grid(row=102, pady=5)
@@ -167,7 +167,7 @@ def _create_on_loan_frame(parent, bg) -> Frame:
 
     member_id_frame = Frame(parent, bg=bg)
 
-    Label(member_id_frame, text="Member ID:", bg=bg, fg='white').pack()
+    Label(member_id_frame, text='Member ID:', bg=bg, fg='white').pack()
 
     member_id = StringVar()
     # show the books the member has on loan when memberID entry is modified
@@ -187,6 +187,7 @@ def _create_on_loan_frame(parent, bg) -> Frame:
         tree.column(header, width=90)
         tree.heading(header, text=header)
     tree.column('ID', anchor=CENTER, width=30)
+    tree.column('Purchase Date', anchor=CENTER)
 
     sb = Scrollbar(tree_frame, orient=VERTICAL, command=tree.yview)
     tree.configure(yscroll=sb.set)
@@ -242,7 +243,7 @@ def _get_selected_book_ids() -> list[int]:
     """
     # get the iids of the items currently selected in the tree
     selected = tree.selection()
-    return [tree.item(s)['values'][0] for s in selected]
+    return [int(tree.set(iid, 'ID')) for iid in selected]
 
 
 def _return_selected():
@@ -322,11 +323,11 @@ def return_book(*book_ids: int) -> tuple[str | None, str | None, str | None]:
         book = database.search_book_by_id(book_id)
 
         if book is None:
-            return (f"No book with ID: {book_id}", _warning(overdue),
+            return (f'No book with ID: {book_id}', _warning(overdue),
                     _success(returned))
 
         if book.member == '0':
-            return (f"Book {book_id} already returned", _warning(overdue),
+            return (f'Book {book_id} already returned', _warning(overdue),
                     _success(returned))
 
         book.member = '0'
@@ -364,7 +365,7 @@ def _success(returned: list[str]) -> str | None:
     database.update_logfile()
     database.update_database()
 
-    return f"Book(s) {{{','.join(returned)}}} returned"
+    return f"Book(s) {','.join(returned)} returned"
 
 
 def _warning(overdue: list[str]) -> str | None:
@@ -384,8 +385,7 @@ def _warning(overdue: list[str]) -> str | None:
         return f"Books {','.join(overdue)} were returned after 60 days"
 
 
-# tests
-def main():
+def test():
     """
     Main method which contains test code for this module.
     """
@@ -403,4 +403,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test()

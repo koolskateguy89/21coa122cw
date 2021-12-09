@@ -7,7 +7,7 @@ other program functionalities.
 
 It has been tested and is working.
 
-Written by Dara Agbola between 8th November and 8th December 2021.
+Written by Dara Agbola between 8th November and 9th December 2021.
 """
 
 from tkinter import *
@@ -25,6 +25,7 @@ modules = {
     'Return': bookreturn,
     'Recommend': bookrecommend
 }
+modules_tuple = tuple(modules.values())
 
 menu: LabelFrame = None
 notebook: ttk.Notebook = None
@@ -34,8 +35,8 @@ bg, fg = 'black', '#f8f8ff'
 
 def _on_tab_selected(event):
     """
-    Call module on_show method when its frame is shown, or show the main menu
-    if that tab is selected.
+    Call module on_show method when its frame is shown, or show the main menu if
+    that tab is selected.
 
     :param event: the tkinter VirtualEvent
     """
@@ -51,11 +52,11 @@ def _on_tab_selected(event):
 
 def _show_module(module):
     """
-    Show the tab for the given module in the notebook and show the notebook.
+    Show the tab for the given module in the notebook.
 
     :param module: the module to show
     """
-    idx = list(modules.values()).index(module)
+    idx = modules_tuple.index(module)
     notebook.select(idx + 1)
     _show_frame(notebook)
 
@@ -71,14 +72,16 @@ def _show_frame(frame):
 
 def _menu_button(text, module) -> Button:
     """
-    Return a standardised Button that acts as a menu option.
+    Return a standardised Button that acts as a menu option to provide the
+    librarian to the other program functionalities.
 
     :param text: the button text
     :param module: the module the button will open
     :return: a decorated button
     """
-    return Button(menu, text=text, command=lambda: (_show_module(module)),
-                  bg=bg, fg=fg, width=48, height=2, borderwidth=2)
+    return Button(menu, text=text, command=lambda: _show_module(module),
+                  bg=bg, fg=fg, width=48, height=2, borderwidth=2,
+                  font=('Arial', 8))
 
 
 def main():
@@ -105,16 +108,17 @@ def main():
     menu.configure(padx=5, pady=10)
     setup_frame(menu)
 
-    title_label = Label(menu, text='Library Management System', bg=bg, fg=fg)
+    title_label = Label(menu, text='Library Management System', bg=bg, fg=fg,
+                        font=('Arial bold', 20))
     title_label.pack(pady=20)
     # underline the title label
     font = Font(title_label, title_label.cget('font'))
     font.configure(underline=True)
     title_label.configure(font=font)
 
-    # set notebook background to bg
     style = ttk.Style()
     style.theme_use('clam')
+    # set notebook background to bg
     style.configure('TNotebook', background=bg)
 
     notebook = ttk.Notebook(container)

@@ -21,7 +21,7 @@ popularity of the title.
 
 It has been tested and is working.
 
-Written by Dara Agbola between 8th November and 8th December 2021.
+Written by Dara Agbola between 8th November and 9th December 2021.
 """
 
 import random
@@ -67,13 +67,13 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     global error_frame
     global error_label
 
-    frame = LabelFrame(parent, text="Book Recommend", padx=5, pady=2, bg=bg,
+    frame = LabelFrame(parent, text='Book Recommend', padx=5, pady=2, bg=bg,
                        fg=fg)
 
     input_frame = Frame(frame, bg=bg)
     input_frame.pack()
 
-    Label(input_frame, text="Enter member ID:", bg=bg, fg=fg) \
+    Label(input_frame, text='Enter member ID:', bg=bg, fg=fg) \
         .grid(row=0, column=0, pady=7)
     id_entry = Entry(input_frame, borderwidth=3)
     id_entry.focus_set()
@@ -81,13 +81,13 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     # recommend book when Enter is pressed
     id_entry.bind('<Return>', lambda event: _recommend())
 
-    Button(frame, text="Recommend", command=_recommend).pack(pady=2)
+    Button(frame, text='Recommend', command=_recommend).pack(pady=2)
 
-    results_frame = LabelFrame(frame, text="Recommendations", bg=bg, fg=fg,
+    results_frame = LabelFrame(frame, text='Recommendations', bg=bg, fg=fg,
                                padx=5, pady=5, relief=RAISED)
     _generate_results_view()
 
-    error_frame = LabelFrame(frame, text="Error", bg='red', fg=fg,
+    error_frame = LabelFrame(frame, text='Error', bg='red', fg=fg,
                              relief=RAISED)
     error_label = Label(error_frame, bg=bg, fg=fg)
     error_label.pack()
@@ -157,19 +157,20 @@ def _recommend():
             titles_with_scores[title] = title_pop * genre_score
 
     # sort titles by score (popularity) in descending order
-    sorted_titles: list[tuple[str, int]] = sorted(titles_with_scores.items(),
-                                                  key=lambda item: item[1],
-                                                  reverse=True)
+    sorted_results: list[tuple[str, int]] = sorted(titles_with_scores.items(),
+                                                   key=lambda item: item[1],
+                                                   reverse=True)
 
-    if len(sorted_titles) < 3:
+    if len(sorted_results) < 3:
         _show_error(f"Cannot recommend books for '{member_id}'")
         return
 
     # can only show at most 10 titles
-    sorted_titles = sorted_titles[:10]
+    sorted_results = sorted_results[:10]
 
-    # see https://stackoverflow.com/a/69878556/17381629
-    _plot(*zip(*sorted_titles))
+    # unpack zipped unpacked sorted_results to get titles and popularities
+    # separately
+    _plot(*zip(*sorted_results))
     display_results()
 
 
@@ -203,8 +204,7 @@ def _reset_figure():
     Reset figure by clearing axes and re-setting axes settings.
     """
     ax.clear()
-    # axes.clear also removes settings so we have to re-set them
-
+    # axes.clear also removes settings, so we have to re-set them
     ax.set_title('Recommended Books')
     ax.set_xlabel('Popularity')
     ax.set_ylabel('Book')
@@ -212,7 +212,6 @@ def _reset_figure():
 
 
 # matplotlib colormaps (21)
-# https://matplotlib.org/stable/gallery/color/colormap_reference.html
 # https://matplotlib.org/stable/tutorials/colors/colormaps.html#classes-of-colormaps
 INF = float('inf')
 COLOR_MAPS = {
@@ -257,12 +256,11 @@ def _get_random_bar_colors(length: int = 10) -> list[tuple[int]]:
     cmaps = [cmap for cmap, cols in COLOR_MAPS.items() if cols >= length]
     cmap = random.choice(cmaps)
 
-    # randomly choose (50% chance) to reverse the colormap
+    # randomly choose (~50% chance) to reverse the colormap
     if random.random() < 0.5:
         cmap += '_r'
 
     # be able to generate n=length linearly normalised values between [0.0, 1.0]
-    # https://stackoverflow.com/a/8391452/17381629
     norm = colors.Normalize(vmin=0, vmax=length - 1)
     # sample colormap at (length-1) normalised intervals
     scalar_map = mplcm.ScalarMappable(norm=norm, cmap=cmap)

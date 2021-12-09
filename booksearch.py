@@ -3,8 +3,8 @@ This module provides the functionality for searching for books, this is done by
 using the database module to query the book database.
 
 The search function allows for searching for books according to its id, genre,
-title, author or member. It also allows casing to be ignored and to search for
-books whose attribute contains the given query.
+title, author or member. It also allows casing to be matched exactly or for
+case-insensitive searching.
 
 Written by Dara Agbola between 8th November and 8th December 2021.
 """
@@ -14,13 +14,14 @@ from tkinter import ttk
 from types import SimpleNamespace
 
 import database
+from database import str_to_date
 
 frame: LabelFrame = None
 
 attr: StringVar = None
 query_entry: Entry = None
 query: StringVar = None
-ignore_case: IntVar = None
+exact_case: IntVar = None
 
 results_wrapper: Frame = None
 tree: ttk.Treeview = None
@@ -39,10 +40,10 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     global attr
     global query_entry
     global query
-    global ignore_case
+    global exact_case
     global results_wrapper
 
-    frame = LabelFrame(parent, text="Book Search", padx=5, pady=5, bg=bg, fg=fg)
+    frame = LabelFrame(parent, text='Book Search', padx=5, pady=5, bg=bg, fg=fg)
 
     # embed a frame for user input so its widgets can be side-by-side
     # without affecting rest of layout
@@ -50,10 +51,11 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     input_frame.pack(pady=7)
 
     attr = StringVar()
-    attr.set('title')  # default: search by title
+    # default: search by title
+    attr.set('title')
     # search when attr is modified
     attr.trace_add('write', _search)
-    ttk.Combobox(input_frame, state="readonly", values=database.BOOK_HEADERS,
+    ttk.Combobox(input_frame, state='readonly', values=database.BOOK_HEADERS,
                  width=13, textvariable=attr).grid(row=0, column=0, padx=5)
 
     query = StringVar()
@@ -64,15 +66,12 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     query_entry.focus_set()
     query_entry.grid(row=0, column=1, padx=5)
 
-    ignore_case = IntVar()
-    # search when ignore_case is modified
-    ignore_case.trace_add('write', _search)
-    Checkbutton(frame, text="Ignore case", bg=fg, fg=bg,
+    exact_case = IntVar()
+    # search when exact_case is modified
+    exact_case.trace_add('write', _search)
+    Checkbutton(frame, text='Case Sensitive', bg=fg, fg=bg,
                 activebackground=fg, activeforeground=bg,
-                variable=ignore_case).pack(pady=5)
-
-    Button(frame, text="Search", font='sans 12 bold', command=_search) \
-        .pack(pady=5)
+                variable=exact_case).pack(pady=5)
 
     _create_results_view()
 
@@ -81,15 +80,15 @@ def get_frame(parent, bg, fg) -> LabelFrame:
 
 def on_show():
     """
-    Set focus on the query entry when this frame is shown.
+    Set focus on the query entry when this module is shown.
     """
     query_entry.focus_set()
 
 
 def _create_results_view():
     """
-    Generate the widgets which will directly display the results, ready to be
-    added to the main frame.
+    Create the widgets that will directly display the results, ready to be added
+    to the main frame.
     """
     global results_wrapper
     global tree
@@ -103,12 +102,49 @@ def _create_results_view():
 
     for header in headers:
         tree.column(header, width=90)
-        tree.heading(header, text=header)
+        tree.heading(header, text=header,
+                     # when a column heading is pressed, the tree will be sorted
+                     # according to values in that column
+                     command=lambda col=header: _sort_tree_column(col, False))
     tree.column('ID', anchor=CENTER, width=30)
+    tree.column('Purchase Date', anchor=CENTER)
+    tree.column('Member', anchor=CENTER)
 
     sb = Scrollbar(results_wrapper, orient=VERTICAL, command=tree.yview)
     tree.configure(yscroll=sb.set)
     sb.grid(row=0, column=1, sticky=NS)
+
+
+def _sort_tree_column(column, reverse):
+    """
+    Sort the given column in tree in given order.
+
+    :param column: the column to sort
+    :param reverse: whether to sort in ascending (False) or descending (True)
+                    order
+    """
+    # get the values in the tree for the given column
+    # include iid in tuple so the sort is stable
+    column_values = [(tree.set(iid, column), iid)
+                     for iid in tree.get_children()]
+
+    # convert purchase date to datetime object to allow proper correct sorting
+    if column == 'Purchase Date':
+        column_values = [(str_to_date(date), iid)
+                         for date, iid in column_values]
+    # convert book ID to int to allow correct sorting
+    elif column == 'ID':
+        column_values = [(int(book_id), iid) for book_id, iid in column_values]
+
+    column_values.sort(reverse=reverse)
+
+    # rearrange items into new sorted positions
+    for index, (val, iid) in enumerate(column_values):
+        tree.move(iid, '', index)
+
+    # reverse sort next time
+    tree.heading(column,
+                 command=lambda: _sort_tree_column(column, not reverse))
 
 
 def _search(*_):
@@ -126,7 +162,7 @@ def _search(*_):
 
     results: list[SimpleNamespace] = search_by_param(attr.get(),
                                                      query_,
-                                                     ignore_case.get())
+                                                     not exact_case.get())
 
     for book in results:
         tags = ('highlight',) if _should_highlight(book) else ()
@@ -134,7 +170,7 @@ def _search(*_):
         # mutate some values to give librarian a better experience
         book_dict = {**vars(book),
                      # if book is available, don't show anyone as member
-                     'member': member if (member := book.member) != '0' else '_'
+                     'member': member if (member := book.member) != '0' else '-'
                      }
 
         tree.insert('', index=END, values=tuple(book_dict.values()), tags=tags)
@@ -224,8 +260,7 @@ def _should_highlight(book: SimpleNamespace) -> bool:
     return False
 
 
-# tests
-def main():
+def test():
     """
     Main method which contains test code for this module.
     """
@@ -235,19 +270,19 @@ def main():
     )
 
     # len(highlight) = 2, len(normal) = 1
-    highlight, normal = f(search_by_title(title="Sinful Duty"))
+    highlight, normal = f(search_by_title(title='Sinful Duty'))
     assert len(highlight) == 2 and len(normal) == 1, \
         "search failed for 'Sinful Duty'"
 
     # len(highlight) = 0, len(normal) = 3
     highlight, normal = f(
-        search_by_title(title="Soldier of Impact")
+        search_by_title(title='Soldier of Impact')
     )
     assert len(highlight) == 0 and len(normal) == 3, \
         "search failed for 'Soldier of Impact'"
 
     # len(highlight) = 1, len(normal) = 2
-    highlight, normal = f(search_by_title(title="Avengers"))
+    highlight, normal = f(search_by_title(title='Avengers'))
     assert len(highlight) == 1 and len(normal) == 2, \
         "search failed for 'Avengers'"
 
@@ -258,4 +293,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test()

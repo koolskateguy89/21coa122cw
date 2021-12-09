@@ -24,7 +24,7 @@ Logs are also represented by dicts:
 
 The logfile is represented as a list[dict].
 
-Written by Dara Agbola between 8th November and 8th December 2021.
+Written by Dara Agbola between 8th November and 9th December 2021.
 """
 
 import csv
@@ -218,8 +218,7 @@ LOG_HEADERS = ('book_id', 'checkout', 'return', 'member')
 logs: list[dict] = _read_logfile()
 
 
-# tests
-def main():
+def test():
     """
     Main method which contains test code for this module.
     """
@@ -254,7 +253,7 @@ def main():
     # print(logs)
 
     # test date functions
-    _s = "12/01/2021"
+    _s = '12/01/2021'
     _d = str_to_date(_s)
     _s1 = date_to_str(_d)
 
@@ -277,4 +276,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test()
