@@ -128,7 +128,6 @@ def _sort_tree_column(column, reverse):
                     order
     """
     # get the values in the tree for the given column
-    # include iid in tuple so the sort is stable
     column_values = [(tree.set(iid, column), iid)
                      for iid in tree.get_children()]
 
