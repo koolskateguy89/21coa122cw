@@ -340,7 +340,7 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
 
     if held_book_ids:
         warning_msg = f"Book(s) {','.join(held_book_ids)} are being held for" \
-                       "more than 60 days"
+                      "more than 60 days"
 
     return None, warning_msg, _success(withdrawn)
 

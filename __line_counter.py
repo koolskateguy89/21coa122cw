@@ -1,11 +1,11 @@
 """
-1835
-bookcheckout.py: 384
+1906
+bookcheckout.py: 386
 bookrecommend.py: 373
-bookreturn.py: 403
-booksearch.py: 259
-database.py: 278
-menu.py: 138
+bookreturn.py: 406
+booksearch.py: 318
+database.py: 279
+menu.py: 144
 """
 
 from os import listdir
@@ -37,5 +37,5 @@ for f in files:
 print(sum_)
 for f, l in lens.items():
     print(f'{f}: {l}')
-#print(lens)
-print(len(lens), len(files))
+# print(lens)
+# print(len(lens), len(files))
