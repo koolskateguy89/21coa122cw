@@ -40,3 +40,4 @@ venv/
 
 # mostly useless rn
 .idea/csv-plugin.xml
+__generate_logs.py
