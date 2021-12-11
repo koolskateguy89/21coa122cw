@@ -150,7 +150,8 @@ def _recommend():
     titles_with_scores = dict[str, int]()
     # generate scores for each title in each genre
     for genre in sorted_genres:
-        titles: list[tuple[str, int]] = recommend_titles_for_genre(genre)
+        titles: list[tuple[str, int]] = recommend_titles_for_genre(genre,
+                                                                   member_id)
         genre_score = genre_popularities[genre]
 
         for title, title_pop in titles:
@@ -206,7 +207,7 @@ def _reset_figure():
     ax.clear()
     # axes.clear also removes settings, so we have to re-set them
     ax.set_title('Recommended Books')
-    ax.set_xlabel('Popularity')
+    ax.set_xlabel('Popularity')  # TODO: rename to something like how much user will like it
     ax.set_ylabel('Book')
     ax.tick_params(labelleft=False)  # don't show y-axis values
 
@@ -316,7 +317,7 @@ def recommend_genres(member_id: str) -> list[str]:
     :param member_id: the ID of the member to recommend for
     :return: the recommended genres for the member
     """
-    member_logs: list[dict] = database.logs_for_member_id(member_id)
+    member_logs = database.logs_for_member_id(member_id)
 
     # key = genre
     # value = no. of books involved in transactions
@@ -335,20 +336,28 @@ def recommend_genres(member_id: str) -> list[str]:
     return [genre for (genre, _) in sorted_genres]
 
 
-def recommend_titles_for_genre(genre: str) -> list[tuple[str, int]]:
+def recommend_titles_for_genre(genre: str, member_id: str) -> list[tuple[str, int]]:
     """
     Calculate the most popular titles for a given genre. Popularity is given by
     the number of times a book/title has been withdrawn.
 
     :param genre: the genre to check for
+    :param member_id: the ID of the member to recommend for
     :return: a sorted list of (title, popularity) for the genre
     """
     books: dict[int, SimpleNamespace] = database.search_books_by_param('genre',
                                                                        genre)
 
+    # get the titles of the books the member has read
+    read_titles: set[str] = _titles_member_has_read(member_id)
+
     # calculate how popular each title is by summing the popularity of each copy
     title_pops = dict[str, int]()
     for book_id, book in books.items():
+        # we don't want to recommend books the member has read
+        if book.title in read_titles:
+            continue
+
         pop = _book_popularity_id(book_id)
         title_pops[book.title] = title_pops.get(book.title, 0) + pop
 
@@ -371,3 +380,25 @@ def _book_popularity_id(book_id: int) -> int:
     """
     book_logs = database.logs_for_book_id(book_id)
     return sum(1 for _ in book_logs)
+
+
+def _titles_member_has_read(member_id: str) -> set[str]:
+    logs = database.logs_for_member_id(member_id)
+    ids = set(log['book_id'] for log in logs)
+    titles = set((database.search_book_by_id(book_id)).title for book_id in ids)
+    return titles
+
+
+def _member_has_read_book(member_id: str, book_id: int) -> bool:
+    """
+    Check if a given member has read a given book.
+
+    :param member_id: the ID of the member
+    :param book_id: the ID of the book to check for
+    :return:
+    """
+    for log in database.logs_for_member_id(member_id):
+        if log['book_id'] == book_id:
+            return True
+    else:
+        return False

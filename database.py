@@ -128,14 +128,16 @@ def update_logfile():
             writer.writerow(log)
 
 
-def logs_for_member_id(member_id: str) -> list[dict]:
+def logs_for_member_id(member_id: str) -> Generator[dict, None, None]:
     """
     Return all logs corresponding to a given member ID.
 
     :param member_id: the member ID
-    :return: all logs corresponding to that member ID
+    :return: all logs corresponding to that member ID in a generator
     """
-    return [log for log in logs if log['member'] == member_id]
+    for log in logs:
+        if log['member'] == member_id:
+            yield log
 
 
 def logs_for_book_id(book_id: int) -> Generator[dict, None, None]:
@@ -143,7 +145,7 @@ def logs_for_book_id(book_id: int) -> Generator[dict, None, None]:
     Return all logs corresponding to a given book ID.
 
     :param book_id: the book ID to search for
-    :return: all logs for the book
+    :return: all logs for the book in a generator
     """
     for log in logs:
         if log['book_id'] == book_id:
