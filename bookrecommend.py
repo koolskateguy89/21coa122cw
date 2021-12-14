@@ -25,6 +25,7 @@ Written by Dara Agbola between 8th November and 9th December 2021.
 """
 
 import random
+from collections import Counter
 from tkinter import *
 from types import SimpleNamespace
 
@@ -42,15 +43,15 @@ import database
 plt.style.use('Solarize_Light2')
 plt.style.use('dark_background')
 
-id_entry: Entry = None
+id_entry: Entry
 
-results_frame: Frame = None
-fig: Figure = None
-ax: Axes = None
-canvas: FigureCanvasTkAgg = None
+results_frame: Frame
+fig: Figure
+ax: Axes
+canvas: FigureCanvasTkAgg
 
-error_frame: Frame = None
-error_label: Label = None
+error_frame: Frame
+error_label: Label
 
 
 def get_frame(parent, bg, fg) -> LabelFrame:
@@ -139,20 +140,28 @@ def _recommend():
 
     sorted_genres: list[str] = recommend_genres(member_id)
 
-    if not sorted_genres:
+    genre_scores: dict[str, int]
+
+    if sorted_genres:
+        # give each genre a score according to how many books the member has
+        # read of that genre; their favourite genre gets the most points
+        genre_scores = {genre: (idx + 1) * 6 for idx, genre in
+                        enumerate(reversed(sorted_genres))}
+    else:
+        # if the member hasn't read any books, pick 2 random genres to recommend
         genres = ('Action', 'Crime', 'Fantasy', 'Mystery', 'Romance', 'Sci-Fi',
                   'Tragedy', 'Drama', 'Adventure', 'Horror')
-        sorted_genres = [random.choice(genres)]
-
-    genre_popularities: dict[str, int] = {genre: (idx + 1) * 6 for idx, genre in
-                                          enumerate(reversed(sorted_genres))}
+        sorted_genres = random.sample(genres, 2)
+        # as we don't know which genres the member likes the most, we weigh all
+        # genres equally
+        genre_scores = {genre: 1 for genre in sorted_genres}
 
     titles_with_scores = dict[str, int]()
     # generate scores for each title in each genre
     for genre in sorted_genres:
         titles: list[tuple[str, int]] = recommend_titles_for_genre(genre,
                                                                    member_id)
-        genre_score = genre_popularities[genre]
+        genre_score = genre_scores[genre]
 
         for title, title_pop in titles:
             titles_with_scores[title] = title_pop * genre_score
@@ -254,7 +263,7 @@ def _get_random_bar_colors(length: int = 10) -> list[tuple[int]]:
     """
     # filter COLOR_MAPS as some don't have enough different colors for each bar
     # to be a different color
-    cmaps = [cmap for cmap, cols in COLOR_MAPS.items() if cols >= length]
+    cmaps = tuple(cmap for cmap, cols in COLOR_MAPS.items() if cols >= length)
     cmap = random.choice(cmaps)
 
     # randomly choose (~50% chance) to reverse the colormap
@@ -319,21 +328,15 @@ def recommend_genres(member_id: str) -> list[str]:
     """
     member_logs = database.logs_for_member_id(member_id)
 
-    # key = genre
-    # value = no. of books involved in transactions
-    genres = dict[str, int]()
+    # count the no. of books of a genre involved in transaction
+    genre_counter = Counter()
     for log in member_logs:
         book = database.search_book_by_id(log['book_id'])
-        genre = book.genre
-
-        genres[genre] = genres.get(genre, 0) + 1
+        genre_counter.update([book.genre])
 
     # sort genres by how many times the member has withdrawn a book of that
     # genre, in descending order
-    sorted_genres = sorted(genres.items(), key=lambda item: item[1],
-                           reverse=True)
-
-    return [genre for (genre, _) in sorted_genres]
+    return sorted(genre_counter, key=genre_counter.get, reverse=True)
 
 
 def recommend_titles_for_genre(genre: str, member_id: str) -> list[tuple[str, int]]:
@@ -383,22 +386,13 @@ def _book_popularity_id(book_id: int) -> int:
 
 
 def _titles_member_has_read(member_id: str) -> set[str]:
+    """
+    Return the book titles that a given member has read.
+
+    :param member_id: the ID of the member
+    :return: a set of the titles the member has read
+    """
     logs = database.logs_for_member_id(member_id)
     ids = set(log['book_id'] for log in logs)
     titles = set((database.search_book_by_id(book_id)).title for book_id in ids)
     return titles
-
-
-def _member_has_read_book(member_id: str, book_id: int) -> bool:
-    """
-    Check if a given member has read a given book.
-
-    :param member_id: the ID of the member
-    :param book_id: the ID of the book to check for
-    :return:
-    """
-    for log in database.logs_for_member_id(member_id):
-        if log['book_id'] == book_id:
-            return True
-    else:
-        return False
