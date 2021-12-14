@@ -4,10 +4,10 @@
 
 - [x] menu
 - [x] bookcheckout
-- [] bookreturn
-- [] booksearch
-- [] database
-- [] bookrecommend
+- [ ] bookreturn
+- [ ] booksearch
+- [ ] database
+- [ ] bookrecommend
 
 ## Overview
 
@@ -193,4 +193,3 @@ return [scalar_map.to_rgba(i) for i in range(length)]
 89,Horror,Robbery,Abra Cadabara,04/11/2016,0
 90,Horror,Robbery,Abra Cadabara,04/11/2016,0
 ```
-
