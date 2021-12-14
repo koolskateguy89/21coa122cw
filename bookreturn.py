@@ -23,19 +23,22 @@ from tkinter import ttk
 
 import database
 
-ids_entry: Entry = None
+ids_entry: Entry
 
-error_frame: LabelFrame = None
-error_label: Label = None
-warning_frame: LabelFrame = None
-warning_label: Label = None
-success_frame: LabelFrame = None
-success_label: Label = None
+error_frame: LabelFrame
+error_label: Label
+warning_frame: LabelFrame
+warning_label: Label
+success_frame: LabelFrame
+success_label: Label
 
-member_id: StringVar = None
-tree_frame: Frame = None
-tree: ttk.Treeview = None
-tree_button: Button = None
+# member_var needs to be global as when it's local, its trace seems to be
+# removed for some reason
+member_var: StringVar
+member_entry: Entry
+tree_frame: Frame
+tree: ttk.Treeview
+tree_button: Button
 
 
 def get_frame(parent, bg, fg) -> LabelFrame:
@@ -105,9 +108,10 @@ def get_frame(parent, bg, fg) -> LabelFrame:
 
 def on_show():
     """
-    Hide status when this frame is shown.
+    Hide status and set focus on the member ID entry when this frame is shown.
     """
     _hide_status()
+    member_entry.focus_set()
 
 
 def _return(*_):
@@ -160,7 +164,8 @@ def _create_on_loan_frame(parent, bg) -> Frame:
     :param bg: background color of the frame
     :return: the frame
     """
-    global member_id
+    global member_var
+    global member_entry
     global tree_frame
     global tree
     global tree_button
@@ -169,10 +174,11 @@ def _create_on_loan_frame(parent, bg) -> Frame:
 
     Label(member_id_frame, text='Member ID:', bg=bg, fg='white').pack()
 
-    member_id = StringVar()
+    member_var = StringVar(member_id_frame)
     # show the books the member has on loan when memberID entry is modified
-    member_id.trace_add('write', _books_on_loan_for_member)
-    Entry(member_id_frame, borderwidth=3, textvariable=member_id).pack()
+    member_var.trace_add('write', _books_on_loan_for_member)
+    member_entry = Entry(member_id_frame, borderwidth=3, textvariable=member_var)
+    member_entry.pack()
 
     tree_frame = Frame(parent, bg=bg, pady=10)
 
@@ -224,7 +230,7 @@ def _books_on_loan_for_member(*_):
     tree_frame.place_forget()
     tree.delete(*tree.get_children())
 
-    member = member_id.get()
+    member = member_entry.get()
 
     books_on_loan = database.search_books_by_param('member', member).values()
     for book in books_on_loan:
@@ -332,22 +338,15 @@ def return_book(*book_ids: int) -> tuple[str | None, str | None, str | None]:
 
         book.member = '0'
 
-        book_logs = database.logs_for_book_id(book_id)
-
-        # get the log that was the checkout of this book
-        log = None
-        for log_ in book_logs:
-            if database.log_is_on_loan(log_):
-                log = log_
-                break
+        # the log that was the checkout of this book is the most recent one
+        most_recent_log = database.logs_for_book_id(book_id)[-1]
 
         # update the log, indicating the book has been returned
-        if log is not None:
-            log['return'] = datetime.now()
-            if database.is_more_than_60_days_ago(log['checkout']):
-                overdue.append(str(book_id))
+        most_recent_log['return'] = datetime.now()
 
         returned.append(str(book_id))
+        if database.is_more_than_60_days_ago(most_recent_log['checkout']):
+            overdue.append(str(book_id))
 
     return None, _warning(overdue), _success(returned)
 
