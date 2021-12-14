@@ -339,7 +339,7 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
     warning_msg = None
 
     if held_book_ids:
-        warning_msg = f"Book(s) {','.join(held_book_ids)} are being held for" \
+        warning_msg = f"Book(s) {','.join(held_book_ids)} are being held for " \
                       "more than 60 days"
 
     return None, warning_msg, _success(withdrawn)
@@ -376,7 +376,7 @@ def test():
     print(f"{checkout_book('coaa', 11) = }")
 
     assert _success([]) is None, '_success failed for empty list'
-    assert _success(['1']) == 'Book(s) {1} withdrawn', \
+    assert _success(['1']) == 'Book(s) 1 withdrawn', \
         '_success failed for non-empty list'
 
     print('bookcheckout.py has passed all tests!')
