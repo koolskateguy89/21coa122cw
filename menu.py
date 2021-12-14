@@ -27,8 +27,8 @@ modules = {
 }
 modules_tuple = tuple(modules.values())
 
-menu: LabelFrame = None
-notebook: ttk.Notebook = None
+menu: LabelFrame
+notebook: ttk.Notebook
 
 bg, fg = 'black', '#f8f8ff'
 

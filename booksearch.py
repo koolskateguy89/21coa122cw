@@ -17,15 +17,15 @@ from typing import Iterable
 import database
 from database import str_to_date
 
-frame: LabelFrame = None
+frame: LabelFrame
 
-attr: StringVar = None
-query_entry: Entry = None
-query: StringVar = None
-exact_case: IntVar = None
+attr: StringVar
+query_entry: Entry
+query: StringVar
+exact_case: IntVar
 
-results_wrapper: Frame = None
-tree: ttk.Treeview = None
+results_wrapper: Frame
+tree: ttk.Treeview
 
 
 def get_frame(parent, bg, fg) -> LabelFrame:
@@ -191,11 +191,9 @@ def _show_books(books: Iterable[SimpleNamespace]):
     for book in books:
         tags = ('highlight',) if _should_highlight(book) else ()
 
-        # mutate some values to give the librarian a better experience
-        book_dict = {**vars(book),
-                     # if book is available, don't show anyone as member
-                     'member': member if (member := book.member) != '0' else '-'
-                     }
+        # mutate member ID to give the librarian a better visual experience
+        book_dict = vars(book)
+        book_dict['member'] = member if (member := book.member) != '0' else '-'
 
         tree.insert('', index=END, values=tuple(book_dict.values()), tags=tags)
 

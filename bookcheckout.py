@@ -18,20 +18,20 @@ from tkinter.font import Font
 
 import database
 
-tree: ttk.Treeview = None
-tree_button: Button = None
+tree: ttk.Treeview
+tree_button: Button
 
-member_entry: Entry = None
-ids_entry: Entry = None
+member_entry: Entry
+ids_entry: Entry
 
-warning_frame: LabelFrame = None
-warning_label: Label = None
+warning_frame: LabelFrame
+warning_label: Label
 
-error_frame: LabelFrame = None
-error_label: Label = None
+error_frame: LabelFrame
+error_label: Label
 
-success_frame: LabelFrame = None
-success_label: Label = None
+success_frame: LabelFrame
+success_label: Label
 
 
 def get_frame(parent, bg, fg) -> LabelFrame:
