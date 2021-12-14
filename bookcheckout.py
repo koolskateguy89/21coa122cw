@@ -1,6 +1,6 @@
 """
 This module provides functionality to check out books. It asks the librarian for
-the borrowers' member ID and the ID of the book(s) they wish to withdraw.
+the borrower's member ID and the ID of the book(s) they wish to withdraw.
 
 It checks all inputs are valid, displaying any errors and warnings. If the book
 is available, its status is updated in the database and the logfile is updated
@@ -9,7 +9,7 @@ with a new entry to signify that the book has been withdrawn.
 If the member is currently holding any books for more than 60 days, a warning
 message is shown to the librarian about these books.
 
-Written by Dara Agbola between 8th November and 9th December 2021.
+Written by Dara Agbola between 8th November and 14th December 2021.
 """
 
 from tkinter import *
@@ -25,13 +25,8 @@ member_entry: Entry
 ids_entry: Entry
 
 warning_frame: LabelFrame
-warning_label: Label
-
 error_frame: LabelFrame
-error_label: Label
-
 success_frame: LabelFrame
-success_label: Label
 
 
 def get_frame(parent, bg, fg) -> LabelFrame:
@@ -47,11 +42,8 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     global ids_entry
 
     global warning_frame
-    global warning_label
     global error_frame
-    global error_label
     global success_frame
-    global success_label
 
     frame = LabelFrame(parent, text='Book Checkout', padx=5, pady=5, bg=bg,
                        fg=fg)
@@ -84,17 +76,14 @@ def get_frame(parent, bg, fg) -> LabelFrame:
 
     warning_frame = LabelFrame(checkout_frame, text='Warning', padx=1,
                                bg='yellow')
-    warning_label = Label(warning_frame, bg=bg, fg=fg, wraplength=300)
-    warning_label.pack()
+    Label(warning_frame, bg=bg, fg=fg, wraplength=300).pack()
 
     error_frame = LabelFrame(checkout_frame, text='Error', padx=1, bg='red')
-    error_label = Label(error_frame, bg=bg, fg=fg, wraplength=300)
-    error_label.pack()
+    Label(error_frame, bg=bg, fg=fg, wraplength=300).pack()
 
     success_frame = LabelFrame(checkout_frame, text='Success', padx=1,
                                bg='green')
-    success_label = Label(success_frame, bg=bg, fg=fg, wraplength=300)
-    success_label.pack()
+    Label(success_frame, bg=bg, fg=fg, wraplength=300).pack()
 
     return frame
 
@@ -174,7 +163,7 @@ def _update_book_tree():
 
 def _get_selected_book_ids() -> list[int]:
     """
-    Return the IDs of the books currently selected in the tree.
+    Get the IDs of the books currently selected in the tree.
 
     :return: the IDs of the selected books
     """
@@ -191,7 +180,7 @@ def _update_tree_button(*_):
     :param _: unused varargs to allow this to be used as any callback
     """
     book_ids = _get_selected_book_ids()
-    text = f"Checkout {','.join(map(str, book_ids))}"
+    text = 'Checkout ' + ','.join(map(str, book_ids))
     tree_button.configure(text=text)
 
     if book_ids:
@@ -265,6 +254,7 @@ def _show_warning(msg):
 
     :param msg: the warning message
     """
+    warning_label = warning_frame.pack_slaves()[0]
     warning_label.configure(text=msg)
     warning_frame.pack(pady=5)
 
@@ -277,11 +267,9 @@ def _show_status(msg, error=False):
     :param msg: the status message
     :param error: whether the status is an error or not
     """
-    if error:
-        label, frame = error_label, error_frame
-    else:
-        label, frame = success_label, success_frame
+    frame = error_frame if error else success_frame
 
+    label = frame.pack_slaves()[0]
     label.configure(text=msg)
     frame.pack(pady=5)
 
@@ -299,9 +287,10 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
                                                            str | None,
                                                            str | None]:
     """
-    Withdraw given book(s) to a given member, update the database and logfile.
+    Withdraw given book(s) to a given member, and update the database and
+    logfile.
 
-    :param member_id: the ID of the member who wants to withdraw book(s)
+    :param member_id: the ID of the member to withdraw book(s) to
     :param book_ids: the ID(s) of the book(s) the member wants to check out
     :return: (error message, warning message, success message)
     """
@@ -321,33 +310,37 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
             return error(f'No book with ID: {book_id}')
 
         if (member := book.member) != '0':
-            return error(f"Book {book_id} is already on loan, to '{member}'")
+            return error(f'Book {book_id} is already on loan, to: {member}')
 
         book.member = member_id
-        log = database.new_log(book_id, member_id)
-        database.logs.append(log)
+        database.logs.append(database.new_log(book_id, member_id))
 
         withdrawn.append(str(book_id))
 
+    # get the IDs of the books the member has had on loan for more than 60 days
     logs = database.logs_for_member_id(member_id)
-
-    held_book_ids = [str(log['book_id']) for log in logs
-                     if database.log_is_on_loan(log) and
-                     database.is_more_than_60_days_ago(log['checkout'])]
-    held_book_ids.sort(key=int)
+    held_book_ids = sorted(log['book_id'] for log in logs
+                           if database.log_is_on_loan(log) and
+                           database.is_more_than_60_days_ago(log['checkout'])
+                           )
 
     warning_msg = None
 
     if held_book_ids:
-        warning_msg = f"Book(s) {','.join(held_book_ids)} are being held for " \
-                      "more than 60 days"
+        if len(held_book_ids) == 1:
+            warning_msg = f'Book {held_book_ids[0]} is being held for more ' \
+                          'than 60 days'
+        else:
+            warning_msg = f"Books {','.join(map(str, held_book_ids))} are " \
+                          "being held for more than 60 days"
 
     return None, warning_msg, _success(withdrawn)
 
 
 def _success(withdrawn: list[str]) -> str | None:
     """
-    Update database files if books have been withdrawn.
+    Update database files if books have been withdrawn, and generate a success
+    message for checkout_book.
 
     :param withdrawn: the ids of withdrawn books
     :return: 'success message' of checkout_book
@@ -358,7 +351,11 @@ def _success(withdrawn: list[str]) -> str | None:
     database.update_logfile()
     database.update_database()
 
-    return f"Book(s) {','.join(withdrawn)} withdrawn"
+    if len(withdrawn) == 1:
+        ...
+        return f'Book {withdrawn[0]} withdrawn'
+    else:
+        return f"Books {','.join(withdrawn)} withdrawn"
 
 
 def test():
@@ -376,7 +373,7 @@ def test():
     print(f"{checkout_book('coaa', 11) = }")
 
     assert _success([]) is None, '_success failed for empty list'
-    assert _success(['1']) == 'Book(s) 1 withdrawn', \
+    assert _success(['1']) == 'Book 1 withdrawn', \
         '_success failed for non-empty list'
 
     print('bookcheckout.py has passed all tests!')
