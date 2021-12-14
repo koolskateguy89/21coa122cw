@@ -16,4 +16,5 @@ Additional features:
 
 Proud of:
   1. booksearch as you type into Entry
+    - same in bookreturn as you type member ID
   2. bookreturn list books on loan to member then return which is clicked
