@@ -1,5 +1,5 @@
 """
-This modules provides functionality for the librarian to return books. It asks
+This module provides functionality for the librarian to return books. It asks
 for the IDs of the books they wish to return and displays an appropriate error
 message or a message letting them know the books have been successfully
 returned.
@@ -14,7 +14,7 @@ updated to have a return date to signify that the book has been returned.
 If a book is being returned after 60 days of being on loan, the librarian is
 warned.
 
-Written by Dara Agbola between 8th November and 9th December 2021.
+Written by Dara Agbola between 8th November and 14th December 2021.
 """
 
 from datetime import datetime
@@ -122,6 +122,10 @@ def _return(*_):
     """
     _hide_status()
     ids = ids_entry.get().split(',')
+
+    if len(ids) != len(set(ids)):
+        _show_status('Duplicate book IDs entered', error=True)
+        return
 
     try:
         ids = [int(book_id) for book_id in ids]
@@ -269,7 +273,7 @@ def _update_tree_button(*_):
     :param _: unused varargs to allow this to be used as any callback
     """
     book_ids = _get_selected_book_ids()
-    text = f"Return {','.join(map(str, book_ids))}"
+    text = 'Return ' + ','.join(map(str, book_ids))
     tree_button.configure(text=text)
 
     if book_ids:
@@ -364,7 +368,10 @@ def _success(returned: list[str]) -> str | None:
     database.update_logfile()
     database.update_database()
 
-    return f"Book(s) {','.join(returned)} returned"
+    if len(returned) == 1:
+        return f"Book {returned[0]} returned"
+    else:
+        return f"Books {','.join(returned)} returned"
 
 
 def _warning(overdue: list[str]) -> str | None:

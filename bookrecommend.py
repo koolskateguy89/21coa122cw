@@ -1,5 +1,5 @@
-""""
-This modules contains functions to be able to recommend books for a member,
+"""
+This module contains functions to be able to recommend books for a member,
 this is done by generating popularity scores for a book, which is determined by
 a combination of how much the member likes the genre and how many times the book
 has been taken out by members.
@@ -21,7 +21,7 @@ popularity of the title.
 
 It has been tested and is working.
 
-Written by Dara Agbola between 8th November and 9th December 2021.
+Written by Dara Agbola between 8th November and 14th December 2021.
 """
 
 import random

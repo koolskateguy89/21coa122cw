@@ -24,7 +24,7 @@ Logs are also represented by dicts:
 
 The logfile is represented as a list[dict].
 
-Written by Dara Agbola between 8th November and 9th December 2021.
+Written by Dara Agbola between 8th November and 14th December 2021.
 """
 
 import csv
