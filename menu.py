@@ -2,12 +2,12 @@
 This module is the entry point for the application. It starts the tkinter
 mainloop.
 
-This module graphically defines the menu for the librarian to be able to access
-other program functionalities.
+This module defines the graphical user interface for the librarian to be able to
+access other program functionalities.
 
 It has been tested and is working.
 
-Written by Dara Agbola between 8th November and 9th December 2021.
+Written by Dara Agbola between 8th November and 14th December 2021.
 """
 
 from tkinter import *
@@ -52,7 +52,7 @@ def _on_tab_selected(event):
 
 def _show_module(module):
     """
-    Show the tab for the given module in the notebook.
+    Select the tab for the given module in the notebook, thus showing it.
 
     :param module: the module to show
     """
@@ -73,7 +73,7 @@ def _show_frame(frame):
 def _menu_button(text, module) -> Button:
     """
     Return a standardised Button that acts as a menu option to provide the
-    librarian to the other program functionalities.
+    librarian access to other program functionalities.
 
     :param text: the button text
     :param module: the module the button will open
@@ -81,12 +81,12 @@ def _menu_button(text, module) -> Button:
     """
     return Button(menu, text=text, command=lambda: _show_module(module),
                   bg=bg, fg=fg, width=48, height=2, borderwidth=2,
-                  font=('Arial', 8))
+                  font=('Arial', 9))
 
 
 def main():
     """
-    Setup and display the program's GUI.
+    Main method to set up and display the program's GUI.
     """
     global menu
     global notebook
@@ -97,7 +97,7 @@ def main():
     root = Tk()
     root.title('Library Management System')
     root.geometry('800x600')
-    root.attributes('-topmost', True)  # always on top
+    # root.attributes('-topmost', True)  # always on top
 
     container = Frame(root)
     container.pack(side=TOP, fill=BOTH, expand=True)
@@ -118,10 +118,10 @@ def main():
 
     style = ttk.Style()
     style.theme_use('clam')
-    # set notebook background to bg
     style.configure('TNotebook', background=bg)
 
     notebook = ttk.Notebook(container)
+    # call _on_tab_selected whenever a different tab is selected in the notebook
     notebook.bind('<<NotebookTabChanged>>', _on_tab_selected)
     setup_frame(notebook)
 
