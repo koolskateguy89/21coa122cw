@@ -269,14 +269,11 @@ def _should_highlight(book: SimpleNamespace) -> bool:
     :param book: the book to check
     :return: whether the book should be highlighted
     """
-    logs = database.logs_for_book_id(book.id)
+    most_recent_log = database.logs_for_book_id(book.id)[-1]
+    checkout_date = most_recent_log['checkout']
 
-    for log in logs:
-        if (database.log_is_on_loan(log) and
-                database.is_more_than_60_days_ago(log['checkout'])):
-            return True
-
-    return False
+    return (database.log_is_on_loan(most_recent_log) and
+            database.is_more_than_60_days_ago(checkout_date))
 
 
 def test():

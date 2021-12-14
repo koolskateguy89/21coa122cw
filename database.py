@@ -140,16 +140,14 @@ def logs_for_member_id(member_id: str) -> Generator[dict, None, None]:
             yield log
 
 
-def logs_for_book_id(book_id: int) -> Generator[dict, None, None]:
+def logs_for_book_id(book_id: int) -> tuple[dict]:
     """
     Return all logs corresponding to a given book ID.
 
     :param book_id: the book ID to search for
-    :return: all logs for the book in a generator
+    :return: all logs for the book
     """
-    for log in logs:
-        if log['book_id'] == book_id:
-            yield log
+    return tuple(log for log in logs if log['book_id'] == book_id)
 
 
 def new_log(book_id: int, member_id: str) -> dict:
