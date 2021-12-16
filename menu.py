@@ -10,6 +10,7 @@ It has been tested and is working.
 Written by F120840 between 8th November and 16th December 2021.
 """
 
+import sys
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
@@ -31,6 +32,22 @@ menu: LabelFrame
 notebook: ttk.Notebook
 
 bg, fg = 'black', '#f8f8ff'
+
+
+def _fix_treeview_color(style):
+    """
+    Fix a tkinter issue for Python versions 3.7, 3.8 & 3.9 where treeview tag
+    colors do not show correctly.
+
+    https://stackoverflow.com/a/60949800/17381629
+    """
+    # filters out any styles starting with ("!disabled", "!selected") from the
+    # style map for 'opt'
+    fixed_map = lambda opt: [elm for elm in style.map("Treeview", query_opt=opt)
+                             if elm[:2] != ("!disabled", "!selected")]
+    style.map("Treeview",
+              foreground=fixed_map("foreground"),
+              background=fixed_map("background"))
 
 
 def _on_tab_selected(event):
@@ -119,6 +136,8 @@ def main():
     style = ttk.Style()
     style.theme_use('clam')
     style.configure('TNotebook', background=bg)
+    if (3, 7) <= sys.version_info < (3, 10):
+        _fix_treeview_color(style)
 
     notebook = ttk.Notebook(container)
     # call _on_tab_selected whenever a different tab is selected in the notebook
