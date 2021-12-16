@@ -9,7 +9,7 @@ Score system:
     score of title = genre popularity * title popularity
 
     genre popularity = reversed(sorted_genres).index(genre) * 6
-        i.e. most popular genre = highest points & vice verse
+        i.e. most popular genre -> highest points & vice versa
         (we multiply by 6 to give it greater weight in score system)
 
     title popularity = the sum of book popularities for all books with that title
@@ -28,6 +28,7 @@ import random
 from collections import Counter
 from tkinter import *
 from types import SimpleNamespace
+from typing import List, Dict, Tuple, Set
 
 import matplotlib.cm as mplcm
 import matplotlib.colors as colors
@@ -138,9 +139,9 @@ def _recommend():
         _show_error(f"Invalid member ID: '{member_id}'")
         return
 
-    sorted_genres: list[str] = recommend_genres(member_id)
+    sorted_genres: List[str] = recommend_genres(member_id)
 
-    genre_scores: dict[str, int]
+    genre_scores: Dict[str, int]
 
     if sorted_genres:
         # give each genre a score according to how many books the member has
@@ -156,10 +157,10 @@ def _recommend():
         # genres equally
         genre_scores = {genre: 1 for genre in sorted_genres}
 
-    titles_with_scores = dict[str, int]()
+    titles_with_scores: Dict[str, int] = {}
     # generate scores for each title in each genre
     for genre in sorted_genres:
-        titles: list[tuple[str, int]] = recommend_titles_for_genre(genre,
+        titles: List[Tuple[str, int]] = recommend_titles_for_genre(genre,
                                                                    member_id)
         genre_score = genre_scores[genre]
 
@@ -167,7 +168,7 @@ def _recommend():
             titles_with_scores[title] = title_pop * genre_score
 
     # sort titles by score (popularity) in descending order
-    sorted_results: list[tuple[str, int]] = sorted(titles_with_scores.items(),
+    sorted_results: List[Tuple[str, int]] = sorted(titles_with_scores.items(),
                                                    key=lambda item: item[1],
                                                    reverse=True)
 
@@ -216,7 +217,8 @@ def _reset_figure():
     ax.clear()
     # axes.clear also removes settings, so we have to re-set them
     ax.set_title('Recommended Books')
-    ax.set_xlabel('Popularity')  # TODO: rename to something like how much user will like it
+    ax.set_xlabel(
+        'Popularity')  # TODO: rename to something like how much user will like it
     ax.set_ylabel('Book')
     ax.tick_params(labelleft=False)  # don't show y-axis values
 
@@ -254,7 +256,7 @@ COLOR_MAPS = {
 }
 
 
-def _get_random_bar_colors(length: int = 10) -> list[tuple[int]]:
+def _get_random_bar_colors(length: int = 10) -> List[Tuple[int]]:
     """
     Return a normalized list of colors from a random colormap, of given length.
 
@@ -278,7 +280,7 @@ def _get_random_bar_colors(length: int = 10) -> list[tuple[int]]:
     return [scalar_map.to_rgba(i) for i in range(length)]
 
 
-def _plot(titles: list[str], popularities: list[int]):
+def _plot(titles: List[str], popularities: List[int]):
     """
     Plot given book recommendations onto a bar chart.
 
@@ -317,7 +319,7 @@ def _plot(titles: list[str], popularities: list[int]):
     canvas.draw()
 
 
-def recommend_genres(member_id: str) -> list[str]:
+def recommend_genres(member_id: str) -> List[str]:
     """
     Calculate the given member's favourite genres and return them sorted by how
     many times they have withdrawn a book of that genre, i.e. how much the
@@ -339,7 +341,8 @@ def recommend_genres(member_id: str) -> list[str]:
     return sorted(genre_counter, key=genre_counter.get, reverse=True)
 
 
-def recommend_titles_for_genre(genre: str, member_id: str) -> list[tuple[str, int]]:
+def recommend_titles_for_genre(genre: str, member_id: str) -> \
+        List[Tuple[str, int]]:
     """
     Calculate the most popular titles for a given genre. Popularity is given by
     the number of times a book/title has been withdrawn.
@@ -348,14 +351,14 @@ def recommend_titles_for_genre(genre: str, member_id: str) -> list[tuple[str, in
     :param member_id: the ID of the member to recommend for
     :return: a sorted list of (title, popularity) for the genre
     """
-    books: dict[int, SimpleNamespace] = database.search_books_by_param('genre',
+    books: Dict[int, SimpleNamespace] = database.search_books_by_param('genre',
                                                                        genre)
 
     # get the titles of the books the member has read
-    read_titles: set[str] = _titles_member_has_read(member_id)
+    read_titles: Set[str] = _titles_member_has_read(member_id)
 
     # calculate how popular each title is by summing the popularity of each copy
-    title_pops = dict[str, int]()
+    title_pops: Dict[str, int] = {}
     for book_id, book in books.items():
         # we don't want to recommend books the member has read
         if book.title in read_titles:
@@ -365,7 +368,7 @@ def recommend_titles_for_genre(genre: str, member_id: str) -> list[tuple[str, in
         title_pops[book.title] = title_pops.get(book.title, 0) + pop
 
     # sort titles in descending popularity order
-    most_popular_titles: list[tuple[str, int]] = sorted(title_pops.items(),
+    most_popular_titles: List[Tuple[str, int]] = sorted(title_pops.items(),
                                                         key=lambda tup: tup[1],
                                                         reverse=True)
 
@@ -385,7 +388,7 @@ def _book_popularity_id(book_id: int) -> int:
     return sum(1 for _ in book_logs)
 
 
-def _titles_member_has_read(member_id: str) -> set[str]:
+def _titles_member_has_read(member_id: str) -> Set[str]:
     """
     Return the book titles that a given member has read.
 

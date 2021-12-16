@@ -29,9 +29,9 @@ Written by F120840 between 8th November and 16th December 2021.
 
 import csv
 from datetime import datetime
-from functools import cache  # TODO: decide to keep or not (waiting 4 email)
+from functools import lru_cache
 from types import SimpleNamespace
-from typing import Generator
+from typing import Dict, List, Generator, Tuple
 
 DATE_FORMAT = '%d/%m/%Y'
 NOW = datetime.now()
@@ -39,7 +39,7 @@ NOW = datetime.now()
 
 # Book database
 
-def _read_database() -> dict[int, SimpleNamespace]:
+def _read_database() -> Dict[int, SimpleNamespace]:
     """
     Read the database file and parse it into a dictionary, with key book id and
     value the SimpleNamespace object representing the book.
@@ -69,7 +69,7 @@ def update_database():
 
 # Searching for books
 
-def search_books_by_param(param: str, value) -> dict[int, SimpleNamespace]:
+def search_books_by_param(param: str, value) -> Dict[int, SimpleNamespace]:
     """
     Return books that match the given parameter.
 
@@ -93,7 +93,7 @@ def search_book_by_id(book_id: int) -> SimpleNamespace:
 
 # Logs
 
-def _read_logfile() -> list[dict]:
+def _read_logfile() -> List[dict]:
     """
     Read the log file.
 
@@ -140,7 +140,7 @@ def logs_for_member_id(member_id: str) -> Generator[dict, None, None]:
             yield log
 
 
-def logs_for_book_id(book_id: int) -> tuple[dict]:
+def logs_for_book_id(book_id: int) -> Tuple[dict]:
     """
     Return all logs corresponding to a given book ID.
 
@@ -188,7 +188,7 @@ def is_more_than_60_days_ago(date: datetime) -> bool:
     return (NOW - date).days > 60
 
 
-@cache
+@lru_cache(maxsize=None)
 def str_to_date(s: str) -> datetime:
     """
     Convert a string to a datetime object according to a DD/MM/YYYY format.
@@ -199,7 +199,7 @@ def str_to_date(s: str) -> datetime:
     return datetime.strptime(s, DATE_FORMAT)
 
 
-@cache
+@lru_cache(maxsize=None)
 def date_to_str(d: datetime) -> str:
     """
     Convert a datetime object to a string with DD/MM/YYYY format as it is more
@@ -212,10 +212,10 @@ def date_to_str(d: datetime) -> str:
 
 
 BOOK_HEADERS = ('id', 'genre', 'title', 'author', 'purchase_date', 'member')
-books: dict[int, SimpleNamespace] = _read_database()
+books: Dict[int, SimpleNamespace] = _read_database()
 
 LOG_HEADERS = ('book_id', 'checkout', 'return', 'member')
-logs: list[dict] = _read_logfile()
+logs: List[dict] = _read_logfile()
 
 
 def test():

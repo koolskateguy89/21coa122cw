@@ -12,7 +12,7 @@ Written by F120840 between 8th November and 16th December 2021.
 from tkinter import *
 from tkinter import ttk
 from types import SimpleNamespace
-from typing import Iterable
+from typing import List, Iterable
 
 import database
 from database import str_to_date
@@ -163,7 +163,7 @@ def _search(*_):
     if not query_:
         return
 
-    results: list[SimpleNamespace] = search_by_param(attr.get(),
+    results: List[SimpleNamespace] = search_by_param(attr.get(),
                                                      query_,
                                                      not exact_case.get())
 
@@ -219,7 +219,7 @@ def _clear_results():
     tree.delete(*tree.get_children())
 
 
-def search_by_param(attr, query, ignore_case=False) -> list[SimpleNamespace]:
+def search_by_param(attr, query, ignore_case=False) -> List[SimpleNamespace]:
     """
     Search for books whose attribute 'attr' match the given query.
 
@@ -249,7 +249,7 @@ def search_by_param(attr, query, ignore_case=False) -> list[SimpleNamespace]:
             if query in get_value(book)]
 
 
-def search_by_title(title, ignore_case=False) -> list[SimpleNamespace]:
+def search_by_title(title, ignore_case=False) -> List[SimpleNamespace]:
     """
     Return all books whose titles contain the given title, ignoring casing if
     specified and including books whose title contains the given title.

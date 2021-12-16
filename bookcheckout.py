@@ -15,7 +15,7 @@ Written by F120840 between 8th November and 16th December 2021.
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
-from typing import Optional
+from typing import List, Tuple, Optional
 
 import database
 
@@ -162,7 +162,7 @@ def _update_book_tree():
         tree.insert('', index=END, values=tuple(book_dict.values()))
 
 
-def _get_selected_book_ids() -> list[int]:
+def _get_selected_book_ids() -> List[int]:
     """
     Get the IDs of the books currently selected in the tree.
 
@@ -212,7 +212,7 @@ def _checkout():
     _checkout0(member_id, ids)
 
 
-def _checkout0(member_id, ids: list[int]):
+def _checkout0(member_id, ids: List[int]):
     """
     Checkout given book(s) to given member and notify librarian of status.
 
@@ -284,7 +284,7 @@ def _hide_status():
     success_frame.pack_forget()
 
 
-def checkout_book(member_id: str, *book_ids: int) -> tuple[Optional[str],
+def checkout_book(member_id: str, *book_ids: int) -> Tuple[Optional[str],
                                                            Optional[str],
                                                            Optional[str]]:
     """
@@ -338,7 +338,7 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[Optional[str],
     return None, warning_msg, _success(withdrawn)
 
 
-def _success(withdrawn: list[str]) -> Optional[str]:
+def _success(withdrawn: List[str]) -> Optional[str]:
     """
     Update database files if books have been withdrawn, and generate a success
     message for checkout_book.

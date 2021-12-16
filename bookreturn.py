@@ -20,7 +20,7 @@ Written by F120840 between 8th November and 16th December 2021.
 from datetime import datetime
 from tkinter import *
 from tkinter import ttk
-from typing import Optional
+from typing import List, Tuple, Optional
 
 import database
 
@@ -182,7 +182,8 @@ def _create_on_loan_frame(parent, bg) -> Frame:
     member_var = StringVar(member_id_frame)
     # show the books the member has on loan when memberID entry is modified
     member_var.trace_add('write', _books_on_loan_for_member)
-    member_entry = Entry(member_id_frame, borderwidth=3, textvariable=member_var)
+    member_entry = Entry(member_id_frame, borderwidth=3,
+                         textvariable=member_var)
     member_entry.pack()
 
     tree_frame = Frame(parent, bg=bg, pady=10)
@@ -246,7 +247,7 @@ def _books_on_loan_for_member(*_):
         tree_frame.place(x=30, y=100)
 
 
-def _get_selected_book_ids() -> list[int]:
+def _get_selected_book_ids() -> List[int]:
     """
     Return the IDs of the books currently selected in the tree.
 
@@ -319,7 +320,7 @@ def _hide_status():
     success_frame.grid_remove()
 
 
-def return_book(*book_ids: int) -> tuple[Optional[str], Optional[str],
+def return_book(*book_ids: int) -> Tuple[Optional[str], Optional[str],
                                          Optional[str]]:
     """
     Try to return given books, update the database and logfile if successful.
@@ -328,8 +329,8 @@ def return_book(*book_ids: int) -> tuple[Optional[str], Optional[str],
     :return: (error message, warning message, success message)
     """
 
-    returned = list[str]()
-    overdue = list[str]()
+    returned: List[str] = []
+    overdue: List[str] = []
 
     for book_id in book_ids:
         book = database.search_book_by_id(book_id)
@@ -357,7 +358,7 @@ def return_book(*book_ids: int) -> tuple[Optional[str], Optional[str],
     return None, _warning(overdue), _success(returned)
 
 
-def _success(returned: list[str]) -> Optional[str]:
+def _success(returned: List[str]) -> Optional[str]:
     """
     Update database files if books have been returned.
 
@@ -376,7 +377,7 @@ def _success(returned: list[str]) -> Optional[str]:
         return f"Books {','.join(returned)} returned"
 
 
-def _warning(overdue: list[str]) -> Optional[str]:
+def _warning(overdue: List[str]) -> Optional[str]:
     """
     Return the warning message for def return_book given an amount of overdue
     books.
@@ -401,7 +402,8 @@ def test():
     database.update_database = lambda: None
     database.update_logfile = lambda: None
 
-    assert return_book() == (None, None, None), 'return_book failed for no input'
+    assert return_book() == (None, None, None), \
+        'return_book failed for no input'
 
     assert _success([]) is None, '_success failed for empty list'
 
