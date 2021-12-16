@@ -256,6 +256,7 @@ def test():
     assert _log['return'] is None, 'new_log: [return] is not None'
 
     print(f'{len(books) = }')
+    assert len(books) == 90, 'incorrect number of books'
     print(f'{len(logs) = }')
 
     # print('Book 11 title:', search_book_by_id(11).title)
