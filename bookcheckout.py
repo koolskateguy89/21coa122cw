@@ -272,6 +272,7 @@ def _show_status(msg, error=False):
 
     label = frame.pack_slaves()[0]
     label.configure(text=msg)
+    
     frame.pack(pady=5)
 
 
