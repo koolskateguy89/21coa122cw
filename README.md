@@ -2,6 +2,8 @@
 
 ## Status
 
+https://stackoverflow.com/a/67350375/17381629
+
 - [x] menu
 - [x] bookcheckout
 - [ ] bookreturn
@@ -12,9 +14,9 @@
 
 ## Python version things
 
-type hint[ ] ; 3.9 (PEP 585)    
-database: functools.cache; 3.9  
-*?: | in type hints; 3.10 
+- [x] type hint[ ] ; 3.9 (PEP 585)
+- [x] database: functools.cache; 3.9
+- [x] *: union (|) type hints; 3.10 (PEP 604)
 
 ## Overview
 
