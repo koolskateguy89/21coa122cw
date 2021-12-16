@@ -97,7 +97,7 @@ def on_show():
 
 def _create_results_view():
     """
-    Create the widgets that will directly display search results.
+    Initialize the widgets that will directly display search results.
     """
     global results_wrapper
     global tree
