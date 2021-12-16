@@ -398,7 +398,9 @@ def test():
 
     assert _success([]) is None, '_success failed for empty list'
 
-    print(f'{return_book(1) = }')
+    assert return_book(1) == (None,
+                              'Book 1 was returned after 60 days',
+                              'Book 1 returned')
 
     print('bookreturn.py has passed all tests!')
 
