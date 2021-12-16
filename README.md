@@ -9,7 +9,7 @@ https://stackoverflow.com/a/67350375/17381629
 - [x] database
 - [x] booksearch
 - [x] bookreturn
-- [ ] bookrecommend
+- [x] bookrecommend
 - [ ] README
 
 ## Python version things

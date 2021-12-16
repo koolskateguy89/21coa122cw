@@ -1,9 +1,12 @@
 Software versions
-  - Python v3.10.0
-  - matplotlib v3.5.0
+  - Python v3.8.9
+  - matplotlib v3.5.1
 
-NOTE: The test code may give false negatives if the database or logfile have been
-modified.
+NOTE: The test code may give false negatives if the database or logfile have
+been modified.
+
+Member IDs already in database/logfile:
+  arad book coaa coai suii util
 
 Additional features:
 - Book searching
