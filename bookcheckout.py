@@ -272,7 +272,7 @@ def _show_status(msg, error=False):
 
     label = frame.pack_slaves()[0]
     label.configure(text=msg)
-    
+
     frame.pack(pady=5)
 
 
@@ -364,21 +364,27 @@ def test():
     """
     Main method which contains test code for this module.
     """
-    # Modify database methods so files aren't modified while testing
-    database.update_database = lambda: None
-    database.update_logfile = lambda: None
+    # Temporarily modify database methods so files aren't modified while testing
+    temp = database.update_database, database.update_logfile
+    database.update_database = database.update_logfile = lambda: None
 
-    print(f"{checkout_book('suii', *[7, 8]) = }")
+    assert checkout_book('suii', 7, 8) == \
+           (None,
+            'Books 4,45,48,49,59,60,73,75 are being held for more than 60 days',
+            'Books 7,8 withdrawn')
 
-    print(f"{checkout_book('util', 5) = }")
+    assert checkout_book('util', 5) == ('Book 5 is already on loan, to: coaa',
+                                        None, None)
 
-    print(f"{checkout_book('coaa', 11) = }")
+    assert checkout_book('test', 15) == (None, None, 'Book 15 withdrawn')
 
     assert _success([]) is None, '_success failed for empty list'
     assert _success(['1']) == 'Book 1 withdrawn', \
         '_success failed for non-empty list'
 
     print('bookcheckout.py has passed all tests!')
+
+    database.update_database, database.update_logfile = temp
 
 
 if __name__ == "__main__":
