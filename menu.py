@@ -113,7 +113,7 @@ def main():
 
     root = Tk()
     root.title('Library Management System')
-    root.geometry('800x600')
+    root.geometry('800x625')
     # root.attributes('-topmost', True)  # always on top
 
     container = Frame(root)
