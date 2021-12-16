@@ -6,7 +6,7 @@ The search function allows for searching for books according to its id, genre,
 title, author or member. It also allows casing to be matched exactly or for
 case-insensitive searching.
 
-Written by Dara Agbola between 8th November and 14th December 2021.
+Written by F120840 between 8th November and 16th December 2021.
 """
 
 from tkinter import *

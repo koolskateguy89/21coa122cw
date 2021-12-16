@@ -24,12 +24,12 @@ Logs are also represented by dicts:
 
 The logfile is represented as a list[dict].
 
-Written by Dara Agbola between 8th November and 14th December 2021.
+Written by F120840 between 8th November and 16th December 2021.
 """
 
 import csv
 from datetime import datetime
-from functools import cache
+from functools import cache  # TODO: decide to keep or not (waiting 4 email)
 from types import SimpleNamespace
 from typing import Generator
 

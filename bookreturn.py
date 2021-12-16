@@ -14,7 +14,7 @@ updated to have a return date to signify that the book has been returned.
 If a book is being returned after 60 days of being on loan, the librarian is
 warned.
 
-Written by Dara Agbola between 8th November and 14th December 2021.
+Written by F120840 between 8th November and 16th December 2021.
 """
 
 from datetime import datetime

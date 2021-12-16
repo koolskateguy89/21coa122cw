@@ -9,7 +9,7 @@ with a new entry to signify that the book has been withdrawn.
 If the member is currently holding any books for more than 60 days, a warning
 message is shown to the librarian about these books.
 
-Written by Dara Agbola between 8th November and 14th December 2021.
+Written by F120840 between 8th November and 16th December 2021.
 """
 
 from tkinter import *
