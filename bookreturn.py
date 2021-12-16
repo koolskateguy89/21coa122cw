@@ -1,18 +1,16 @@
 """
 This module provides functionality for the librarian to return books. It asks
-for the IDs of the books they wish to return and displays an appropriate error
-message or a message letting them know the books have been successfully
-returned.
+for the ID(s) of the book(s) to return and displays an appropriate error or
+success message if books have been successfully returned.
 
-The librarian can enter a member's ID and the books that member has on loan are
-displayed. The librarian can then select one of these books and press a button
-to return that book.
+The librarian can enter a member's ID and the books that member currently has
+on loan are displayed. The librarian can then select from these books to return.
 
 When a book is returned, the most recent transaction log for that book is
-updated to have a return date to signify that the book has been returned.
+updated to include a return date to signify that the book has been returned.
 
-If a book is being returned after 60 days of being on loan, the librarian is
-warned.
+If a book is being returned more than 60 days after it was checked out, the
+librarian is warned.
 
 Written by F120840 between 8th November and 16th December 2021.
 """
@@ -27,11 +25,8 @@ import database
 ids_entry: Entry
 
 error_frame: LabelFrame
-error_label: Label
 warning_frame: LabelFrame
-warning_label: Label
 success_frame: LabelFrame
-success_label: Label
 
 # member_var needs to be global as when it's local, its trace seems to be
 # removed for some reason
@@ -44,7 +39,7 @@ tree_button: Button
 
 def get_frame(parent, bg, fg) -> LabelFrame:
     """
-    Create and decorate the frame for checking out books.
+    Create and decorate the frame for returning books.
 
     :param parent: the parent of the frame
     :param bg: the background color
@@ -53,11 +48,8 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     """
     global ids_entry
     global error_frame
-    global error_label
     global warning_frame
-    global warning_label
     global success_frame
-    global success_label
 
     frame = LabelFrame(parent, text='Book Return', padx=5, pady=5, bg=bg, fg=fg)
     # put columns 0 and 1 in the middle (horizontally)
@@ -84,24 +76,22 @@ def get_frame(parent, bg, fg) -> LabelFrame:
                              bg='red', fg=bg)
     # configure the error frame's grid options to be before the warning frame
     error_frame.grid(row=100, pady=5)
-    error_label = Label(error_frame, bg=bg, fg=fg, wraplength=300)
-    error_label.pack()
+    Label(error_frame, bg=bg, fg=fg, wraplength=300).pack()
 
     warning_frame = LabelFrame(return_frame, text='Warning', padx=1, pady=5,
                                bg='yellow', fg=bg)
     # configure the warning frame's grid options to be before the success frame
     warning_frame.grid(row=101, pady=5)
-    warning_label = Label(warning_frame, bg=bg, fg=fg, wraplength=300)
-    warning_label.pack()
+    Label(warning_frame, bg=bg, fg=fg, wraplength=300).pack()
 
     success_frame = LabelFrame(return_frame, text='Error', padx=1, pady=5,
                                bg='green', fg=bg)
     # configure the success frame's grid options to be after the warning frame
     success_frame.grid(row=102, pady=5)
-    success_label = Label(success_frame, bg=bg, fg=fg, wraplength=300)
-    success_label.pack()
+    Label(success_frame, bg=bg, fg=fg, wraplength=300).pack()
 
-    # hide status frames
+    # hide status frames as they were made visible to configure their grid
+    # options
     _hide_status()
 
     return frame
@@ -260,7 +250,7 @@ def _get_selected_book_ids() -> List[int]:
 
 def _return_selected():
     """
-    Return the book currently selected in the tree.
+    Return the book(s) currently selected in the tree.
     """
     _hide_status()
 
@@ -290,6 +280,7 @@ def _show_warning(msg):
 
     :param msg: the warning message
     """
+    warning_label = warning_frame.pack_slaves()[0]
     warning_label.configure(text=msg)
     warning_frame.grid()
 
@@ -302,12 +293,11 @@ def _show_status(msg, error=False):
     :param msg: the status message
     :param error: whether the status is an error or not
     """
-    if error:
-        label, frame = error_label, error_frame
-    else:
-        label, frame = success_label, success_frame
+    frame = error_frame if error else success_frame
 
+    label = frame.pack_slaves()[0]
     label.configure(text=msg)
+
     frame.grid()
 
 
@@ -360,7 +350,8 @@ def return_book(*book_ids: int) -> Tuple[Optional[str], Optional[str],
 
 def _success(returned: List[str]) -> Optional[str]:
     """
-    Update database files if books have been returned.
+    Update database files if books have been returned and generate the success
+    message for def return_book given a list of returned books.
 
     :param returned: the ids of returned books
     :return: 'success message' of def return_book
@@ -379,7 +370,7 @@ def _success(returned: List[str]) -> Optional[str]:
 
 def _warning(overdue: List[str]) -> Optional[str]:
     """
-    Return the warning message for def return_book given an amount of overdue
+    Return the warning message for def return_book given a list of overdue
     books.
 
     :param overdue: the IDs of books that were returned after 60 days
@@ -398,9 +389,9 @@ def test():
     """
     Main method which contains test code for this module.
     """
-    # Modify database methods so files aren't modified while testing
-    database.update_database = lambda: None
-    database.update_logfile = lambda: None
+    # Temporarily modify database methods so files aren't modified while testing
+    temp = database.update_database, database.update_logfile
+    database.update_database = database.update_logfile = lambda: None
 
     assert return_book() == (None, None, None), \
         'return_book failed for no input'
@@ -410,6 +401,8 @@ def test():
     print(f'{return_book(1) = }')
 
     print('bookreturn.py has passed all tests!')
+
+    database.update_database, database.update_logfile = temp
 
 
 if __name__ == "__main__":
