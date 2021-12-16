@@ -10,7 +10,7 @@ https://stackoverflow.com/a/67350375/17381629
 - [x] booksearch
 - [x] bookreturn
 - [x] bookrecommend
-- [ ] README
+- [x] README.txt
 
 ## Python version things
 

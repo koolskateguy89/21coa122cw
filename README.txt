@@ -8,16 +8,15 @@ been modified.
 Member IDs already in database/logfile:
   arad book coaa coai suii util
 
-Additional features:
-- Book searching
+Proud of:
+- Book search
   - Search by any book attribute
   - Case sensitive/insensitive
 - Book checkout
   - GUI select from list of available books
 - Book return
   - GUI select from list of books member has loaned out
-
-Proud of:
-  1. booksearch as you type into Entry
-    - same in bookreturn as you type member ID
-  2. bookreturn list books on loan to member then return which is clicked
+- Book recommend
+  - Recommendation system takes into account how much a member likes a genre as
+    well as how popular a genre/book is
+  - Random normalised bar chart colors
