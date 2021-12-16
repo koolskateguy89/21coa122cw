@@ -155,7 +155,7 @@ def _update_book_tree():
     tree.delete(*tree.get_children())
 
     # we only want to show available books
-    available_books = database.search_books_by_param('member', '0').values()
+    available_books = database.search_books_by_param('member', '0')
 
     for book in available_books:
         book_dict = vars(book)
@@ -217,7 +217,7 @@ def _checkout0(member_id, ids: List[int]):
     Checkout given book(s) to given member and notify librarian of status.
 
     :param member_id: the ID of the member who is taking books out
-    :param ids: the IDs of the books to checkout
+    :param ids: the IDs of the books to check out
     """
     error, warning, success = checkout_book(member_id, *ids)
 
@@ -321,7 +321,7 @@ def checkout_book(member_id: str, *book_ids: int) -> Tuple[Optional[str],
     # get the IDs of the books the member has had on loan for more than 60 days
     logs = database.logs_for_member_id(member_id)
     held_book_ids = sorted(log['book_id'] for log in logs
-                           if database.log_is_on_loan(log) and
+                           if database.is_log_on_loan(log) and
                            database.is_more_than_60_days_ago(log['checkout'])
                            )
 

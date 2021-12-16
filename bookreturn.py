@@ -238,7 +238,7 @@ def _books_on_loan_for_member(*_):
 
     member = member_entry.get()
 
-    books_on_loan = database.search_books_by_param('member', member).values()
+    books_on_loan = database.search_books_by_param('member', member)
     for book in books_on_loan:
         book_dict = vars(book)
         tree.insert('', index=END, values=tuple(book_dict.values()))
@@ -346,7 +346,7 @@ def return_book(*book_ids: int) -> Tuple[Optional[str], Optional[str],
         book.member = '0'
 
         # the log that was the checkout of this book is the most recent one
-        most_recent_log = database.logs_for_book_id(book_id)[-1]
+        most_recent_log = database.most_recent_log_for_book_id(book.id)
 
         # update the log, indicating the book has been returned
         most_recent_log['return'] = datetime.now()

@@ -2,7 +2,8 @@
 This module contains functions that other modules can use to interact with the
 book database and logfile. This module also contains utility functions.
 
-Books are represented by SimpleNamespaces, mimicking a class:
+Books are represented by SimpleNamespaces, mimicking a class that only has
+attributes:
     'id': int
     'genre': str
     'title': str
@@ -10,19 +11,16 @@ Books are represented by SimpleNamespaces, mimicking a class:
     'purchase_date': str
     'member': str
 
-The book database is represented as a dict[int, SimpleNamespace]
-    key = book_id
-    value = book (SimpleNamespace)
+The book database is represented as a List[SimpleNamespace].
 
-
-Logs are also represented by dicts:
+Logs are represented by dicts:
     'book_id': int
     'checkout': datetime
     'return': datetime/None
     'member': str
   Books that haven't been returned yet have None as 'return'
 
-The logfile is represented as a list[dict].
+The logfile is represented as a List[dict].
 
 Written by F120840 between 8th November and 16th December 2021.
 """
@@ -31,28 +29,27 @@ import csv
 from datetime import datetime
 from functools import lru_cache
 from types import SimpleNamespace
-from typing import Dict, List, Generator, Tuple
+from typing import List, Generator
 
 DATE_FORMAT = '%d/%m/%Y'
 NOW = datetime.now()
 
 
-# Book database
+# Books
 
-def _read_database() -> Dict[int, SimpleNamespace]:
+def _read_database() -> List[SimpleNamespace]:
     """
-    Read the database file and parse it into a dictionary, with key book id and
-    value the SimpleNamespace object representing the book.
+    Read the book database file.
 
-    :return: a dictionary representing the database
+    :return: a list of SimpleNamespaces representing all books
     """
-    result = {}
+    result = []
 
     with open('database.txt', newline='') as db:
         reader = csv.DictReader(db, fieldnames=BOOK_HEADERS)
         for book in reader:
             book['id'] = int(book['id'])
-            result[book['id']] = SimpleNamespace(**book)
+            result.append(SimpleNamespace(**book))
 
     return result
 
@@ -63,13 +60,11 @@ def update_database():
     """
     with open('database.txt', 'w', newline='') as db:
         writer = csv.DictWriter(db, fieldnames=BOOK_HEADERS)
-        for book in books.values():
+        for book in books:
             writer.writerow(vars(book))
 
 
-# Searching for books
-
-def search_books_by_param(param: str, value) -> Dict[int, SimpleNamespace]:
+def search_books_by_param(param: str, value) -> List[SimpleNamespace]:
     """
     Return books that match the given parameter.
 
@@ -77,39 +72,47 @@ def search_books_by_param(param: str, value) -> Dict[int, SimpleNamespace]:
     :param value: the value to check the property is equal to
     :return: books that match the parameter
     """
-    return {book_id: book for book_id, book in books.items()
-            if getattr(book, param) == value}
+    return [book for book in books if getattr(book, param) == value]
 
 
 def search_book_by_id(book_id: int) -> SimpleNamespace:
     """
-    Return the book with the given ID.
+    Return the book with the given ID, or None if there is no book with that ID.
 
     :param book_id: the book ID to search for
     :return: the book with the given ID
     """
-    return books.get(book_id)
+    if 1 <= book_id <= len(books):
+        return books[book_id - 1]
+
+
+def is_book_on_loan(book: SimpleNamespace) -> bool:
+    """
+    Check if the given book is currently on loan.
+
+    :param book: the book to check
+    :return: True if the book is on loan, False is the book is available
+    """
+    return book.member != '0'
 
 
 # Logs
 
 def _read_logfile() -> List[dict]:
     """
-    Read the log file.
+    Read the logfile.
 
     :return: a list of dicts representing all logs
     """
-    result = []
-
     with open('logfile.txt', newline='') as logfile:
         reader = csv.DictReader(logfile, fieldnames=LOG_HEADERS)
-        # update types
-        for log in reader:
-            log['book_id'] = int(log['book_id'])
-            log['checkout'] = str_to_date(log['checkout'])
-            log['return'] = str_to_date(r) if (r := log['return']) else None
+        result = list(reader)
 
-            result.append(log)
+    # update types
+    for log in result:
+        log['book_id'] = int(log['book_id'])
+        log['checkout'] = str_to_date(log['checkout'])
+        log['return'] = str_to_date(r) if (r := log['return']) else None
 
     return result
 
@@ -121,7 +124,7 @@ def update_logfile():
     with open('logfile.txt', 'w', newline='') as logfile:
         writer = csv.DictWriter(logfile, fieldnames=LOG_HEADERS)
         for log in logs:
-            log = log.copy()
+            log = log.copy()  # copy so we don't mutate the original object
             log['checkout'] = date_to_str(log['checkout'])
             if (ret := log['return']) is not None:
                 log['return'] = date_to_str(ret)
@@ -130,33 +133,37 @@ def update_logfile():
 
 def logs_for_member_id(member_id: str) -> Generator[dict, None, None]:
     """
-    Return all logs corresponding to a given member ID.
+    Return all logs corresponding to the member with the given ID.
 
     :param member_id: the member ID
-    :return: all logs corresponding to that member ID in a generator
+    :return: all logs corresponding to that member, in a generator
     """
     for log in logs:
         if log['member'] == member_id:
             yield log
 
 
-def logs_for_book_id(book_id: int) -> Tuple[dict]:
+def most_recent_log_for_book_id(book_id: int) -> dict:
     """
-    Return all logs corresponding to a given book ID.
+    Return the most recent log that corresponds to a book with given ID. This
+    log can be used to determine  whether the book has been on loan for more
+    than 60 days or not.
 
-    :param book_id: the book ID to search for
-    :return: all logs for the book
+    :param book_id: the ID the book to check for
+    :return: the most recent log (dict)
     """
-    return tuple(log for log in logs if log['book_id'] == book_id)
+    for log in reversed(logs):
+        if log['book_id'] == book_id:
+            return log
 
 
 def new_log(book_id: int, member_id: str) -> dict:
     """
-    Create a new log (dict), ready to be appended to logs.
+    Create a new log, ready to be appended to logs.
 
-    :param book_id: the ID of the book the log is for
-    :param member_id: the ID of the member the log is for
-    :return: the log
+    :param book_id: the ID of the book the log corresponds to
+    :param member_id: the ID of the member the log corresponds to
+    :return: the log as a dict
     """
     return {
         'book_id': book_id,
@@ -166,9 +173,11 @@ def new_log(book_id: int, member_id: str) -> dict:
     }
 
 
-def log_is_on_loan(log: dict) -> bool:
+def is_log_on_loan(log: dict) -> bool:
     """
-    Check if given log is incomplete, thus if the book it represents is on loan.
+    Check if the given log has no return date, thus if the book it corresponds
+    to is currently on loan - according only to the given log (the book may be
+    on loan but a different log would show this).
 
     :param log: the log to check
     :return: whether the log's book is on loan, according only to the log
@@ -191,7 +200,7 @@ def is_more_than_60_days_ago(date: datetime) -> bool:
 @lru_cache(maxsize=None)
 def str_to_date(s: str) -> datetime:
     """
-    Convert a string to a datetime object according to a DD/MM/YYYY format.
+    Convert a string in the DD/MM/YYYY format to a datetime object.
 
     :param s: the date string
     :return: the datetime object
@@ -212,7 +221,7 @@ def date_to_str(d: datetime) -> str:
 
 
 BOOK_HEADERS = ('id', 'genre', 'title', 'author', 'purchase_date', 'member')
-books: Dict[int, SimpleNamespace] = _read_database()
+books: List[SimpleNamespace] = _read_database()
 
 LOG_HEADERS = ('book_id', 'checkout', 'return', 'member')
 logs: List[dict] = _read_logfile()
@@ -224,7 +233,7 @@ def test():
     """
     # test book keys
     if books:
-        _book = next(iter(books.values()))
+        _book = books[0]
         assert sorted(BOOK_HEADERS) == sorted(list(vars(_book).keys())), \
             'BOOK_HEADERS and book keys are inconsistent'
 
@@ -268,9 +277,9 @@ def test():
     _log_on_loan = {'return': None}
     _log_not_on_loan = {'return': datetime.now()}
 
-    assert log_is_on_loan(_log_on_loan), 'log_is_on_loan failed for on loan'
-    assert not log_is_on_loan(_log_not_on_loan), \
-        'log_is_on_loan failed for not on loan'
+    assert is_log_on_loan(_log_on_loan), 'is_log_on_loan failed for on loan'
+    assert not is_log_on_loan(_log_not_on_loan), \
+        'is_log_on_loan failed for not on loan'
 
     print('database.py has passed all tests!')
 

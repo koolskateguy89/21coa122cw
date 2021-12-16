@@ -178,7 +178,7 @@ def _show_all_books():
     Show all books in the database on screen.
     """
     _clear_results()
-    _show_books(database.books.values())
+    _show_books(database.books)
     display_results()
 
 
@@ -191,8 +191,9 @@ def _show_books(books: Iterable[SimpleNamespace]):
     for book in books:
         tags = ('highlight',) if _should_highlight(book) else ()
 
+        # copy to not modify the original book object
+        book_dict = vars(book).copy()
         # mutate member ID to give the librarian a better visual experience
-        book_dict = vars(book)
         book_dict['member'] = member if (member := book.member) != '0' else '-'
 
         tree.insert('', index=END, values=tuple(book_dict.values()), tags=tags)
@@ -245,7 +246,7 @@ def search_by_param(attr, query, ignore_case=False) -> List[SimpleNamespace]:
     if ignore_case:
         query = query.casefold()
 
-    return [book for book in database.books.values()
+    return [book for book in database.books
             if query in get_value(book)]
 
 
@@ -269,10 +270,10 @@ def _should_highlight(book: SimpleNamespace) -> bool:
     :param book: the book to check
     :return: whether the book should be highlighted
     """
-    most_recent_log = database.logs_for_book_id(book.id)[-1]
+    most_recent_log = database.most_recent_log_for_book_id(book.id)
     checkout_date = most_recent_log['checkout']
 
-    return (database.log_is_on_loan(most_recent_log) and
+    return (database.is_book_on_loan(book) and
             database.is_more_than_60_days_ago(checkout_date))
 
 

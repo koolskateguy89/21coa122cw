@@ -6,9 +6,9 @@ https://stackoverflow.com/a/67350375/17381629
 
 - [x] menu
 - [x] bookcheckout
-- [ ] bookreturn
+- [x] database
 - [ ] booksearch
-- [ ] database
+- [ ] bookreturn
 - [ ] bookrecommend
 - [ ] README
 

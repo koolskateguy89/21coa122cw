@@ -364,7 +364,7 @@ def recommend_titles_for_genre(genre: str, member_id: str) -> \
         if book.title in read_titles:
             continue
 
-        pop = _book_popularity_id(book_id)
+        pop = _book_id_popularity(book_id)
         title_pops[book.title] = title_pops.get(book.title, 0) + pop
 
     # sort titles in descending popularity order
@@ -376,7 +376,7 @@ def recommend_titles_for_genre(genre: str, member_id: str) -> \
     return most_popular_titles[:10]
 
 
-def _book_popularity_id(book_id: int) -> int:
+def _book_id_popularity(book_id: int) -> int:
     """
     Return the number of times the book with given ID has been taken out, i.e.
     the book's popularity.
@@ -384,8 +384,7 @@ def _book_popularity_id(book_id: int) -> int:
     :param book_id: the ID of the book to check
     :return: the popularity of the book
     """
-    book_logs = database.logs_for_book_id(book_id)
-    return sum(1 for _ in book_logs)
+    return sum(1 for log in database.logs if log['book_id'] == book_id)
 
 
 def _titles_member_has_read(member_id: str) -> Set[str]:
