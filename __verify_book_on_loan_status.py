@@ -13,7 +13,7 @@ def main():
         book = database.search_book_by_id(bookId)
         isOnLoanMemberID = book.member != '0'
 
-        logsOnLoan = sum(1 for log in bookLogs if database.log_is_on_loan(log))
+        logsOnLoan = sum(1 for log in bookLogs if database.is_log_on_loan(log))
 
         if isOnLoanMemberID:
             assert logsOnLoan == 1, f'{bookId} is out but has {logsOnLoan} on loan'
