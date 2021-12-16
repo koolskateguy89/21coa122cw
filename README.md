@@ -10,6 +10,12 @@
 - [ ] bookrecommend
 - [ ] README
 
+## Python version things
+
+type hint[ ] ; 3.9 (PEP 585)    
+database: functools.cache; 3.9  
+*?: | in type hints; 3.10 
+
 ## Overview
 
 Simple library management system for a librarian
