@@ -15,6 +15,7 @@ Written by F120840 between 8th November and 16th December 2021.
 from tkinter import *
 from tkinter import ttk
 from tkinter.font import Font
+from typing import Optional
 
 import database
 
@@ -283,9 +284,9 @@ def _hide_status():
     success_frame.pack_forget()
 
 
-def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
-                                                           str | None,
-                                                           str | None]:
+def checkout_book(member_id: str, *book_ids: int) -> tuple[Optional[str],
+                                                           Optional[str],
+                                                           Optional[str]]:
     """
     Withdraw given book(s) to a given member, and update the database and
     logfile.
@@ -337,7 +338,7 @@ def checkout_book(member_id: str, *book_ids: int) -> tuple[str | None,
     return None, warning_msg, _success(withdrawn)
 
 
-def _success(withdrawn: list[str]) -> str | None:
+def _success(withdrawn: list[str]) -> Optional[str]:
     """
     Update database files if books have been withdrawn, and generate a success
     message for checkout_book.

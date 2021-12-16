@@ -20,6 +20,7 @@ Written by F120840 between 8th November and 16th December 2021.
 from datetime import datetime
 from tkinter import *
 from tkinter import ttk
+from typing import Optional
 
 import database
 
@@ -318,7 +319,8 @@ def _hide_status():
     success_frame.grid_remove()
 
 
-def return_book(*book_ids: int) -> tuple[str | None, str | None, str | None]:
+def return_book(*book_ids: int) -> tuple[Optional[str], Optional[str],
+                                         Optional[str]]:
     """
     Try to return given books, update the database and logfile if successful.
 
@@ -355,7 +357,7 @@ def return_book(*book_ids: int) -> tuple[str | None, str | None, str | None]:
     return None, _warning(overdue), _success(returned)
 
 
-def _success(returned: list[str]) -> str | None:
+def _success(returned: list[str]) -> Optional[str]:
     """
     Update database files if books have been returned.
 
@@ -374,7 +376,7 @@ def _success(returned: list[str]) -> str | None:
         return f"Books {','.join(returned)} returned"
 
 
-def _warning(overdue: list[str]) -> str | None:
+def _warning(overdue: list[str]) -> Optional[str]:
     """
     Return the warning message for def return_book given an amount of overdue
     books.
