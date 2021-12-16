@@ -1,10 +1,17 @@
 """
-This module provides the functionality for searching for books, this is done by
-using the database module to query the book database.
+This module provides functionality to search for books in the database. This is
+done by using the database module to query the book database.
 
-The search function allows for searching for books according to its id, genre,
-title, author or member. It also allows casing to be matched exactly or for
-case-insensitive searching.
+A book can be searched for according to:
+  - ID
+  - Genre
+  - Title
+  - Author
+  - Purchase date
+  - ID of the member that currently has the book
+
+The default search behaviour is case-insensitive, though case-sensitive
+searching is an available option.
 
 Written by F120840 between 8th November and 16th December 2021.
 """
@@ -52,15 +59,14 @@ def get_frame(parent, bg, fg) -> LabelFrame:
     input_frame.pack(pady=7)
 
     attr = StringVar()
-    # default: search by title
-    attr.set('title')
+    attr.set('title')  # default: search by title
     # search when attr is modified
     attr.trace_add('write', _search)
     ttk.Combobox(input_frame, state='readonly', values=database.BOOK_HEADERS,
                  width=13, textvariable=attr).grid(row=0, column=0, padx=5)
 
     query = StringVar()
-    # search when query entry text is modified
+    # search when query is modified
     query.trace_add('write', _search)
     query_entry = Entry(input_frame, bg=fg, fg=bg, width=30, borderwidth=1,
                         textvariable=query)
@@ -91,8 +97,7 @@ def on_show():
 
 def _create_results_view():
     """
-    Create the widgets that will directly display the results, ready to be added
-    to the main frame.
+    Create the widgets that will directly display search results.
     """
     global results_wrapper
     global tree
@@ -121,7 +126,7 @@ def _create_results_view():
 
 def _sort_tree_column(column, reverse):
     """
-    Sort the given column in tree in given order.
+    Sort the given column in the tree in given order.
 
     :param column: the column to sort
     :param reverse: whether to sort in ascending (False) or descending (True)
@@ -131,11 +136,11 @@ def _sort_tree_column(column, reverse):
     column_values = [(tree.set(iid, column), iid)
                      for iid in tree.get_children()]
 
-    # convert purchase date to datetime object to allow proper correct sorting
+    # convert purchase date to datetime object for correct sorting
     if column == 'Purchase Date':
         column_values = [(str_to_date(date), iid)
                          for date, iid in column_values]
-    # convert book ID to int to allow correct sorting
+    # convert book ID to int for correct sorting
     elif column == 'ID':
         column_values = [(int(book_id), iid) for book_id, iid in column_values]
 
@@ -152,7 +157,7 @@ def _sort_tree_column(column, reverse):
 
 def _search(*_):
     """
-    Perform a search then display the results on screen.
+    Perform a book search then display the results on screen.
 
     :param _: unused varargs to allow this to be used as any callback
     """
@@ -191,10 +196,11 @@ def _show_books(books: Iterable[SimpleNamespace]):
     for book in books:
         tags = ('highlight',) if _should_highlight(book) else ()
 
-        # copy to not modify the original book object
-        book_dict = vars(book).copy()
-        # mutate member ID to give the librarian a better visual experience
-        book_dict['member'] = member if (member := book.member) != '0' else '-'
+        book_dict = {
+            **vars(book),
+            # mutate member ID to give the librarian a better visual experience
+            'member': member if (member := book.member) != '0' else '-'
+        }
 
         tree.insert('', index=END, values=tuple(book_dict.values()), tags=tags)
 
@@ -215,7 +221,7 @@ def hide_results():
 
 def _clear_results():
     """
-    Removes all items from the tree
+    Clear search results by removing all items in the tree.
     """
     tree.delete(*tree.get_children())
 
@@ -224,11 +230,9 @@ def search_by_param(attr, query, ignore_case=False) -> List[SimpleNamespace]:
     """
     Search for books whose attribute 'attr' match the given query.
 
-    Whether the attribute matches the query depends on the values of
-    ignore_case.
-
-    If ignore_case is True, the casing of the attribute and query are both
-    ignored.
+    Whether the attribute matches the query depends on the value of ignore_case:
+      If ignore_case is True, the casing of the attribute and query are both
+      ignored (the search becomes case-insensitive).
 
     The attribute matches the query if it contains the query.
 
@@ -253,7 +257,7 @@ def search_by_param(attr, query, ignore_case=False) -> List[SimpleNamespace]:
 def search_by_title(title, ignore_case=False) -> List[SimpleNamespace]:
     """
     Return all books whose titles contain the given title, ignoring casing if
-    specified and including books whose title contains the given title.
+    specified.
 
     :param title: the search param
     :param ignore_case: whether to ignore casing or not
@@ -264,11 +268,11 @@ def search_by_title(title, ignore_case=False) -> List[SimpleNamespace]:
 
 def _should_highlight(book: SimpleNamespace) -> bool:
     """
-    Return whether a given book should be highlighted due to it being on loan
-    for more than 60 days.
-    
+    Check whether the given book should be highlighted: if it being on loan for
+    more than 60 days.
+
     :param book: the book to check
-    :return: whether the book should be highlighted
+    :return: whether the book should be highlighted or not
     """
     most_recent_log = database.most_recent_log_for_book_id(book.id)
     checkout_date = most_recent_log['checkout']
