@@ -1,11 +1,11 @@
-Software versions
+Minimum software versions:
   - Python v3.8.9
   - matplotlib v3.5.1
 
-NOTE: The test code may give false negatives if the database or logfile have
-been modified.
+NOTE: Test code is likely to give false negatives if the database or logfile are
+modified.
 
-Member IDs already in database/logfile:
+Member IDs already in database & logfile:
   arad book coaa coai suii util
 
 Proud of:
