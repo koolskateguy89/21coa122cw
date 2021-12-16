@@ -217,7 +217,7 @@ def _checkout0(member_id, ids: List[int]):
     Checkout given book(s) to given member and notify librarian of status.
 
     :param member_id: the ID of the member who is taking books out
-    :param ids: the IDs of the books to check out
+    :param ids: the IDs of the books to checkout
     """
     error, warning, success = checkout_book(member_id, *ids)
 
