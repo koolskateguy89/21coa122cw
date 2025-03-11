@@ -2,8 +2,6 @@
 
 ## Status
 
-https://stackoverflow.com/a/67350375/17381629
-
 - [x] menu
 - [x] bookcheckout
 - [x] database
